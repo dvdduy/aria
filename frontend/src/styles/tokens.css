@@ -1,0 +1,141 @@
+/*
+   Aria Design Tokens
+   Single source of truth for visual values used by the React app.
+   Values are aligned with docs/hr-agent-design-system.html.
+*/
+
+:root {
+  /* Brand */
+  --color-brand-50: #EEEDFE;
+  --color-brand-100: #CECBF6;
+  --color-brand-200: #AFA9EC;
+  --color-brand-400: #7F77DD;
+  --color-brand-600: #534AB7;
+  --color-brand-800: #3C3489;
+  --color-brand-950: #26215C;
+
+  /* Semantic */
+  --color-success-50: #EAF3DE;
+  --color-success-200: #97C459;
+  --color-success-600: #3B6D11;
+  --color-success-800: #27500A;
+  --color-warning-50: #FAEEDA;
+  --color-warning-200: #FAC775;
+  --color-warning-600: #854F0B;
+  --color-warning-800: #633806;
+  --color-danger-50: #FCEBEB;
+  --color-danger-200: #F09595;
+  --color-danger-600: #A32D2D;
+  --color-danger-800: #791F1F;
+  --color-info-50: #E6F1FB;
+  --color-info-200: #85B7EB;
+  --color-info-600: #185FA5;
+  --color-info-800: #0C447C;
+
+  /* Neutral */
+  --color-gray-50: #F1EFE8;
+  --color-gray-100: #D3D1C7;
+  --color-gray-400: #888780;
+  --color-gray-600: #5F5E5A;
+  --color-gray-800: #444441;
+  --color-gray-950: #2C2C2A;
+
+  /* Avatar accents */
+  --color-teal-50: #E1F5EE;
+  --color-teal-800: #085041;
+  --color-pink-50: #FBEAF0;
+  --color-pink-800: #72243E;
+  --color-green-50: #EAF3DE;
+  --color-green-800: #27500A;
+
+  /* Surfaces */
+  --color-bg-primary: #FFFFFF;
+  --color-bg-secondary: #F8F7F4;
+  --color-bg-tertiary: #F1EFE8;
+  --color-bg-sidebar: #FAFAF8;
+
+  /* Text */
+  --color-text-primary: #1C1B19;
+  --color-text-secondary: #5F5E5A;
+  --color-text-tertiary: #888780;
+  --color-text-disabled: #B4B2A9;
+  --color-text-inverse: #FFFFFF;
+  --color-text-brand: #534AB7;
+
+  /* Borders */
+  --color-border-subtle: rgba(0, 0, 0, 0.08);
+  --color-border-default: rgba(0, 0, 0, 0.14);
+  --color-border-strong: rgba(0, 0, 0, 0.24);
+  --color-border-brand: #7F77DD;
+
+  /* Typography */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", Arial, sans-serif;
+  --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", monospace;
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-lg: 16px;
+  --text-xl: 18px;
+  --text-2xl: 22px;
+  --leading-tight: 1.3;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.7;
+  --weight-normal: 400;
+  --weight-medium: 500;
+
+  /* Spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 9999px;
+
+  /* Layout */
+  --sidebar-width: 220px;
+  --chat-max-width: 680px;
+  --bubble-user-bg: var(--color-brand-600);
+  --bubble-agent-bg: var(--color-bg-secondary);
+
+  /* Z-index */
+  --z-base: 0;
+  --z-raised: 10;
+  --z-overlay: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+
+  /* Motion */
+  --transition-fast: 100ms ease;
+  --transition-normal: 180ms ease;
+  --transition-slow: 300ms ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-primary: #1C1B19;
+    --color-bg-secondary: #242320;
+    --color-bg-tertiary: #161513;
+    --color-bg-sidebar: #1A1917;
+
+    --color-text-primary: #E8E6DF;
+    --color-text-secondary: #9C9A92;
+    --color-text-tertiary: #6B6963;
+    --color-text-disabled: #444441;
+
+    --color-border-subtle: rgba(255, 255, 255, 0.07);
+    --color-border-default: rgba(255, 255, 255, 0.13);
+    --color-border-strong: rgba(255, 255, 255, 0.22);
+
+    --bubble-agent-bg: var(--color-bg-secondary);
+  }
+}

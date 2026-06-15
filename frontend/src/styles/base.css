@@ -1,0 +1,121 @@
+/* ─────────────────────────────────────────────
+   AI HR Agent — Base Styles
+   Reset + sensible defaults built on tokens.
+   ───────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-normal);
+  line-height: var(--leading-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-secondary);
+}
+
+/* ── Headings ───────────────────────────────── */
+h1 { font-size: var(--text-2xl); font-weight: var(--weight-medium); line-height: var(--leading-tight); }
+h2 { font-size: var(--text-xl);  font-weight: var(--weight-medium); line-height: var(--leading-tight); }
+h3 { font-size: var(--text-lg);  font-weight: var(--weight-medium); line-height: var(--leading-tight); }
+h4 { font-size: var(--text-base);font-weight: var(--weight-medium); line-height: var(--leading-tight); }
+
+/* ── Links ──────────────────────────────────── */
+a {
+  color: var(--color-text-brand);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* ── Inputs reset ───────────────────────────── */
+input, textarea, select, button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+/* ── Focus visible ──────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-brand-400);
+  outline-offset: 2px;
+}
+
+/* ── Scrollbar (subtle) ─────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border-default); border-radius: var(--radius-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-border-strong); }
+
+/* ── Selection ──────────────────────────────── */
+::selection {
+  background: var(--color-brand-100);
+  color: var(--color-brand-950);
+}
+
+/* ── Utility: visually hidden ───────────────── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* ── Utility: text sizes ────────────────────── */
+.text-2xl   { font-size: var(--text-2xl); }
+.text-xl    { font-size: var(--text-xl);  }
+.text-lg    { font-size: var(--text-lg);  }
+.text-base  { font-size: var(--text-base);}
+.text-sm    { font-size: var(--text-sm);  }
+.text-xs    { font-size: var(--text-xs);  }
+
+/* ── Utility: text colours ──────────────────── */
+.text-primary   { color: var(--color-text-primary);   }
+.text-secondary { color: var(--color-text-secondary); }
+.text-tertiary  { color: var(--color-text-tertiary);  }
+.text-brand     { color: var(--color-text-brand);     }
+.text-success   { color: var(--color-success-600);    }
+.text-warning   { color: var(--color-warning-600);    }
+.text-danger    { color: var(--color-danger-600);     }
+.text-info      { color: var(--color-info-600);       }
+
+/* ── Utility: font weight ───────────────────── */
+.font-normal { font-weight: var(--weight-normal); }
+.font-medium { font-weight: var(--weight-medium); }
+
+/* ── Utility: truncate ──────────────────────── */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Divider ────────────────────────────────── */
+.divider {
+  border: none;
+  border-top: 0.5px solid var(--color-border-subtle);
+  margin: var(--space-4) 0;
+}
