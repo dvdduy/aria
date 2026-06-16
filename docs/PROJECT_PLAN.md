@@ -306,11 +306,15 @@ Detailed guide:
 
 **Goal:** Users can browse HR policies, and the agent can answer policy questions from stored policy data.
 
+Detailed guide:
+
+- [E6-S1 Policy Categories](development/E6-S1-policy-categories.md)
+
 ### Stories
 
 | Story ID | User Story | Priority | Status |
 | --- | --- | --- | --- |
-| E6-S1 | As a user, I can browse policy categories. | P1 | Scaffolded |
+| E6-S1 | As a user, I can browse policy categories. | P1 | Verified |
 | E6-S2 | As a user, I can search policy titles and categories. | P1 | Not Started |
 | E6-S3 | As a user, I can ask the agent about a policy and receive a grounded answer. | P1 | Not Started |
 | E6-S4 | As a user, policy answers identify the source policy and version. | P1 | Not Started |
