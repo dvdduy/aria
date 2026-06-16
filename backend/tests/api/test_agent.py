@@ -28,6 +28,66 @@ def fake_delay(*args, **kwargs):
     return FakeTask()
 
 
+def test_chat_returns_job_id_and_generated_session_id(client, db, monkeypatch):
+    user = _create_user(db, "owner@example.com")
+    fake_redis = FakeRedis()
+    captured = {}
+
+    def fake_delay_with_capture(message, session_id, user_id):
+        captured["message"] = message
+        captured["session_id"] = session_id
+        captured["user_id"] = user_id
+        return FakeTask()
+
+    monkeypatch.setattr(agent_api, "redis_client", fake_redis)
+    monkeypatch.setattr(agent_api.run_agent_task, "delay", fake_delay_with_capture)
+
+    response = client.post(
+        "/api/agent/chat",
+        headers=_auth_headers(user),
+        json={"message": "Please review my leave requests"},
+    )
+
+    body = response.json()
+    assert response.status_code == 200
+    assert body["job_id"] == "job-123"
+    assert body["session_id"]
+    assert captured == {
+        "message": "Please review my leave requests",
+        "session_id": body["session_id"],
+        "user_id": str(user.id),
+    }
+
+
+def test_chat_preserves_provided_session_id(client, db, monkeypatch):
+    user = _create_user(db, "owner@example.com")
+    fake_redis = FakeRedis()
+    captured = {}
+
+    def fake_delay_with_capture(message, session_id, user_id):
+        captured["session_id"] = session_id
+        return FakeTask()
+
+    monkeypatch.setattr(agent_api, "redis_client", fake_redis)
+    monkeypatch.setattr(agent_api.run_agent_task, "delay", fake_delay_with_capture)
+
+    response = client.post(
+        "/api/agent/chat",
+        headers=_auth_headers(user),
+        json={"message": "hello", "session_id": "session-abc"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"job_id": "job-123", "session_id": "session-abc"}
+    assert captured["session_id"] == "session-abc"
+
+
+def test_chat_requires_authentication(client):
+    response = client.post("/api/agent/chat", json={"message": "hello"})
+
+    assert response.status_code == 403
+
+
 def test_chat_stores_job_owner(client, db, monkeypatch):
     user = _create_user(db, "owner@example.com")
     fake_redis = FakeRedis()
