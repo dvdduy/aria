@@ -208,6 +208,27 @@ def test_job_result_allows_owner(client, db, monkeypatch):
     assert response.json() == {"job_id": "job-123", "result": "Done", "tool_trace": []}
 
 
+def test_job_result_defaults_to_empty_string_when_result_missing(client, db, monkeypatch):
+    user = _create_user(db, "owner@example.com")
+    fake_redis = FakeRedis()
+    fake_redis.set("job:job-123:user_id", str(user.id))
+    monkeypatch.setattr(agent_api, "redis_client", fake_redis)
+
+    response = client.get(
+        "/api/agent/result/job-123",
+        headers=_auth_headers(user),
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"job_id": "job-123", "result": "", "tool_trace": []}
+
+
+def test_job_result_requires_authentication(client):
+    response = client.get("/api/agent/result/job-123")
+
+    assert response.status_code == 403
+
+
 def test_job_result_returns_tool_trace_for_owner(client, db, monkeypatch):
     user = _create_user(db, "owner@example.com")
     fake_redis = FakeRedis()
