@@ -40,6 +40,8 @@ export interface HRPolicy {
   effective_date: string | null
 }
 
+export type HRPolicySummary = Omit<HRPolicy, 'content'>
+
 export interface PayrollRecord {
   id: string
   employee_id: string
