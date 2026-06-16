@@ -38,21 +38,17 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "request_id": {"type": "string"},
                 "status": {"type": "string", "enum": ["approved", "rejected"]},
-                "approved_by": {"type": "string", "description": "Manager employee UUID"},
+                "rejection_reason": {"type": "string"},
             },
-            "required": ["request_id", "status", "approved_by"],
+            "required": ["request_id", "status"],
         },
     },
     {
         "name": "list_team_leave",
-        "description": "List all leave requests for employees reporting to a manager.",
+        "description": "List pending leave requests for the current manager's direct reports.",
         "input_schema": {
             "type": "object",
-            "properties": {
-                "manager_id": {"type": "string"},
-                "status_filter": {"type": "string", "description": "pending | approved | all"},
-            },
-            "required": ["manager_id"],
+            "properties": {},
         },
     },
     {
