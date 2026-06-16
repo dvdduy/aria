@@ -50,6 +50,8 @@ def summarize_tool_result(result: dict) -> str:
         return f"leave_request:{result['leave_request'].get('status', 'unknown')}"
     if "payroll_records" in result:
         return f"payroll_records:{len(result['payroll_records'])}"
+    if "policy" in result:
+        return f"policy:{result['policy'].get('title', 'unknown')}"
     return "success"
 
 

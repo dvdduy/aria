@@ -3,7 +3,6 @@ import pytest
 from app.agent.tools.context import ToolContext
 from app.agent.tools.leave_tools import submit_leave_request
 from app.agent.tools.notification_tools import send_notification
-from app.agent.tools.policy_tools import get_policy
 from app.agent.tools.responses import (
     invalid_request,
     not_authorized,
@@ -79,5 +78,4 @@ def test_tool_response_helpers_return_standard_error_shape():
 
 def test_scaffolded_tools_return_consistent_not_implemented(db, tool_context):
     assert submit_leave_request(db, tool_context) == not_implemented("submit_leave_request")
-    assert get_policy(db, tool_context) == not_implemented("get_policy")
     assert send_notification(db, tool_context) == not_implemented("send_notification")

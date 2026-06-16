@@ -41,6 +41,9 @@ def test_summarize_tool_result_handles_known_success_shapes():
     assert agent_tools.summarize_tool_result(
         {"leave_request": {"status": "approved", "id": "leave-1"}}
     ) == "leave_request:approved"
+    assert agent_tools.summarize_tool_result(
+        {"policy": {"title": "Annual Leave Policy"}}
+    ) == "policy:Annual Leave Policy"
     assert agent_tools.summarize_tool_result({"ok": True}) == "success"
 
 
