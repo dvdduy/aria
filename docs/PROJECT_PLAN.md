@@ -258,13 +258,14 @@ Detailed guide:
 Detailed guide:
 
 - [E5-S1 Trusted Tool Context](development/E5-S1-trusted-tool-context.md)
+- [E5-S2 Employee Agent Read Tools](development/E5-S2-employee-agent-read-tools.md)
 
 ### Stories
 
 | Story ID | User Story | Priority | Status |
 | --- | --- | --- | --- |
 | E5-S1 | As the backend, every tool receives a trusted tool context containing user and employee identity. | P0 | Verified |
-| E5-S2 | As an employee, agent tools can read my own profile and leave data. | P0 | Not Started |
+| E5-S2 | As an employee, agent tools can read my own profile and leave data. | P0 | Verified |
 | E5-S3 | As a manager, agent tools can read and update direct-report leave requests. | P0 | Not Started |
 | E5-S4 | As an employee, agent tools cannot read another employee's payroll. | P0 | Not Started |
 | E5-S5 | As an admin, agent tools can perform broader HR actions where explicitly allowed. | P1 | Not Started |

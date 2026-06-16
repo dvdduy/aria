@@ -1,24 +1,18 @@
 TOOL_DEFINITIONS = [
     {
         "name": "get_employee_info",
-        "description": "Look up an employee by name or email address.",
+        "description": "Fetch the current user's own employee profile.",
         "input_schema": {
             "type": "object",
-            "properties": {
-                "name": {"type": "string", "description": "Full or partial name"},
-                "email": {"type": "string", "description": "Exact email address"},
-            },
+            "properties": {},
         },
     },
     {
         "name": "get_leave_request",
-        "description": "Fetch pending or recent leave requests for an employee.",
+        "description": "Fetch the current user's own leave requests.",
         "input_schema": {
             "type": "object",
-            "properties": {
-                "employee_id": {"type": "string", "description": "Employee UUID"},
-            },
-            "required": ["employee_id"],
+            "properties": {},
         },
     },
     {

@@ -1,22 +1,36 @@
-"""Employee agent tools.
-
-The functions are explicit stubs until the employee service and authorization
-rules are implemented. Keeping the real tool names importable lets the agent
-runner start without pretending these tools are production-ready.
-"""
+"""Employee agent tools."""
 
 from sqlalchemy.orm import Session
 
 from app.agent.tools.context import ToolContext
+from app.models.employee import Employee
 
 
-def _not_implemented(tool_name: str) -> dict:
+def _profile_not_linked(tool_name: str) -> dict:
     return {
-        "error": "not_implemented",
+        "error": "profile_not_linked",
         "tool": tool_name,
-        "message": "This agent tool is scaffolded but not implemented yet.",
+        "message": "Your user account is not linked to an employee profile.",
     }
 
 
 def get_employee_info(db: Session, context: ToolContext, **kwargs) -> dict:
-    return _not_implemented("get_employee_info")
+    if not context.employee:
+        return _profile_not_linked("get_employee_info")
+
+    return {
+        "tool": "get_employee_info",
+        "employee": _serialize_employee(context.employee),
+    }
+
+
+def _serialize_employee(employee: Employee) -> dict:
+    return {
+        "id": str(employee.id),
+        "email": employee.email,
+        "full_name": employee.full_name,
+        "department": employee.department,
+        "role": employee.role,
+        "manager_id": str(employee.manager_id) if employee.manager_id else None,
+        "is_active": employee.is_active,
+    }
