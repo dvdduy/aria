@@ -7,6 +7,8 @@ runner start without pretending these tools are production-ready.
 
 from sqlalchemy.orm import Session
 
+from app.agent.tools.context import ToolContext
+
 
 def _not_implemented(tool_name: str) -> dict:
     return {
@@ -16,5 +18,5 @@ def _not_implemented(tool_name: str) -> dict:
     }
 
 
-def get_employee_info(db: Session, **kwargs) -> dict:
+def get_employee_info(db: Session, context: ToolContext, **kwargs) -> dict:
     return _not_implemented("get_employee_info")

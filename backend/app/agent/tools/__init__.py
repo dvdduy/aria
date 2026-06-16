@@ -1,3 +1,4 @@
+from app.agent.tools.context import ToolContext
 from app.agent.tools.employee_tools import get_employee_info
 from app.agent.tools.leave_tools import (
     get_leave_request,
@@ -21,11 +22,19 @@ TOOL_MAP = {
 }
 
 
-def dispatch_tool(name: str, inputs: dict, db) -> dict:
+def dispatch_tool(name: str, inputs: dict, db, context: ToolContext) -> dict:
     fn = TOOL_MAP.get(name)
     if not fn:
-        return {"error": f"Unknown tool: {name}"}
+        return {
+            "error": "unknown_tool",
+            "tool": name,
+            "message": f"Unknown tool: {name}",
+        }
     try:
-        return fn(db=db, **inputs)
+        return fn(db=db, context=context, **inputs)
     except Exception as exc:
-        return {"error": str(exc)}
+        return {
+            "error": "tool_failed",
+            "tool": name,
+            "message": str(exc),
+        }

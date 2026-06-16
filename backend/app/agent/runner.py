@@ -3,9 +3,11 @@ from sqlalchemy.orm import Session
 
 from app.agent.prompts import SYSTEM_PROMPT
 from app.agent.tools import dispatch_tool
+from app.agent.tools.context import build_tool_context
 from app.agent.tools.definitions import TOOL_DEFINITIONS
 from app.core.config import settings
 from app.core.logging import logger
+from app.models.user import User
 
 
 class AgentRunner:
@@ -13,6 +15,11 @@ class AgentRunner:
         self.client = Anthropic(api_key=settings.anthropic_api_key)
 
     def run(self, message: str, session_id: str, user_id: str, db: Session) -> str:
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return "I could not verify your account for this request."
+
+        tool_context = build_tool_context(db, user)
         history = self._load_history(session_id, user_id, db)
         history.append({"role": "user", "content": message})
 
@@ -38,7 +45,7 @@ class AgentRunner:
                 tool_results = []
                 for block in response.content:
                     if block.type == "tool_use":
-                        result = dispatch_tool(block.name, block.input, db)
+                        result = dispatch_tool(block.name, block.input, db, tool_context)
                         logger.info("tool_called", tool=block.name, session_id=session_id)
                         tool_results.append({
                             "type": "tool_result",

@@ -255,11 +255,15 @@ Detailed guide:
 
 **Goal:** The model can request tool calls, but only backend code can authorize and execute them.
 
+Detailed guide:
+
+- [E5-S1 Trusted Tool Context](development/E5-S1-trusted-tool-context.md)
+
 ### Stories
 
 | Story ID | User Story | Priority | Status |
 | --- | --- | --- | --- |
-| E5-S1 | As the backend, every tool receives a trusted tool context containing user and employee identity. | P0 | Not Started |
+| E5-S1 | As the backend, every tool receives a trusted tool context containing user and employee identity. | P0 | Verified |
 | E5-S2 | As an employee, agent tools can read my own profile and leave data. | P0 | Not Started |
 | E5-S3 | As a manager, agent tools can read and update direct-report leave requests. | P0 | Not Started |
 | E5-S4 | As an employee, agent tools cannot read another employee's payroll. | P0 | Not Started |

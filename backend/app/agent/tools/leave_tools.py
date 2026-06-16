@@ -6,6 +6,8 @@ business logic and authorization checks are built.
 
 from sqlalchemy.orm import Session
 
+from app.agent.tools.context import ToolContext
+
 
 def _not_implemented(tool_name: str) -> dict:
     return {
@@ -15,17 +17,17 @@ def _not_implemented(tool_name: str) -> dict:
     }
 
 
-def get_leave_request(db: Session, **kwargs) -> dict:
+def get_leave_request(db: Session, context: ToolContext, **kwargs) -> dict:
     return _not_implemented("get_leave_request")
 
 
-def submit_leave_request(db: Session, **kwargs) -> dict:
+def submit_leave_request(db: Session, context: ToolContext, **kwargs) -> dict:
     return _not_implemented("submit_leave_request")
 
 
-def update_leave_status(db: Session, **kwargs) -> dict:
+def update_leave_status(db: Session, context: ToolContext, **kwargs) -> dict:
     return _not_implemented("update_leave_status")
 
 
-def list_team_leave(db: Session, **kwargs) -> dict:
+def list_team_leave(db: Session, context: ToolContext, **kwargs) -> dict:
     return _not_implemented("list_team_leave")
