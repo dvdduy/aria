@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.models.employee import Employee
 from app.models.leave import LeaveRequest
-from app.schemas.leave import LeaveRequestCreate
+from app.schemas.leave import LeaveRequestCreate, LeaveRequestReject
 from app.services.employee_service import can_manage_employee, list_direct_reports
 
 
@@ -108,6 +108,31 @@ def approve_leave_request(
         raise InvalidLeaveRequestError("Leave request is not pending")
 
     request.status = "approved"
+    request.approved_by = manager.id
+    request.approved_at = datetime.now(UTC)
+    db.commit()
+    db.refresh(request)
+    return request
+
+
+def reject_leave_request(
+    db: Session,
+    manager: Employee,
+    request_id,
+    payload: LeaveRequestReject,
+) -> LeaveRequest:
+    request = db.query(LeaveRequest).filter(LeaveRequest.id == request_id).first()
+    if not request:
+        raise LeaveRequestNotFoundError("Leave request not found")
+
+    employee = db.query(Employee).filter(Employee.id == request.employee_id).first()
+    if not employee or not can_manage_employee(manager, employee):
+        raise LeaveAuthorizationError("Not authorized to reject this leave request")
+
+    if request.status != "pending":
+        raise InvalidLeaveRequestError("Leave request is not pending")
+
+    request.status = "rejected"
     request.approved_by = manager.id
     request.approved_at = datetime.now(UTC)
     db.commit()

@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class LeaveRequestCreate(BaseModel):
@@ -9,6 +9,10 @@ class LeaveRequestCreate(BaseModel):
     start_date: date
     end_date: date
     reason: str | None = None
+
+
+class LeaveRequestReject(BaseModel):
+    rejection_reason: str = Field(min_length=1)
 
 
 class LeaveRequestResponse(BaseModel):
