@@ -69,26 +69,25 @@ const NAV = [
   },
 ]
 
-function decodeTokenEmail(token: string): string {
+function decodeTokenClaims(token: string): { name?: string; email?: string } {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    return (payload.email ?? payload.sub ?? '') as string
+    return JSON.parse(atob(token.split('.')[1])) as { name?: string; email?: string }
   } catch {
-    return ''
+    return {}
   }
 }
 
-function getInitials(email: string): string {
-  const local = email.split('@')[0]
-  const parts = local.split(/[._-]/)
+function getInitials(displayName: string): string {
+  const parts = displayName.split(/[\s._@-]/).filter(Boolean)
   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
-  return local.slice(0, 2).toUpperCase()
+  return displayName.slice(0, 2).toUpperCase()
 }
 
 export default function AppLayout() {
   const token = sessionStorage.getItem('aria_token') ?? ''
-  const email = decodeTokenEmail(token)
-  const initials = email ? getInitials(email) : '?'
+  const { name, email } = decodeTokenClaims(token)
+  const displayName = name ?? email ?? ''
+  const initials = displayName ? getInitials(displayName) : '?'
 
   return (
     <div className="app-shell">
@@ -119,7 +118,7 @@ export default function AppLayout() {
           <div className="user-row">
             <div className="avatar avatar-sm">{initials}</div>
             <div>
-              <div className="user-name">{email || 'Unknown'}</div>
+              <div className="user-name">{displayName || 'Unknown'}</div>
             </div>
           </div>
         </div>

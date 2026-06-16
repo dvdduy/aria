@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
+from app.models.employee import Employee
 from app.models.user import User
 from app.schemas.leave import LeaveRequestCreate, LeaveRequestReject, LeaveRequestResponse
 from app.services.employee_service import get_employee_for_user
@@ -21,10 +22,11 @@ from app.services.leave_service import (
 router = APIRouter()
 
 
-def _serialize_leave_request(request):
+def _serialize_leave_request(request, employee_name: str | None = None):
     return {
         "id": str(request.id),
         "employee_id": str(request.employee_id),
+        "employee_name": employee_name,
         "leave_type": request.leave_type,
         "start_date": request.start_date,
         "end_date": request.end_date,
@@ -48,7 +50,7 @@ def get_my_leave_requests(
             detail="Employee profile not linked",
         )
     return [
-        _serialize_leave_request(request)
+        _serialize_leave_request(request, employee_name=employee.full_name)
         for request in list_leave_requests_for_employee(db, employee)
     ]
 
@@ -86,9 +88,20 @@ def get_team_pending_leave_requests(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Employee profile not linked",
         )
+    requests = list_pending_leave_requests_for_manager(db, manager)
+    employee_ids = {r.employee_id for r in requests}
+    employees: dict = {}
+    if employee_ids:
+        employees = {
+            e.id: e
+            for e in db.query(Employee).filter(Employee.id.in_(employee_ids)).all()
+        }
     return [
-        _serialize_leave_request(request)
-        for request in list_pending_leave_requests_for_manager(db, manager)
+        _serialize_leave_request(
+            r,
+            employee_name=employees[r.employee_id].full_name if r.employee_id in employees else None,
+        )
+        for r in requests
     ]
 
 

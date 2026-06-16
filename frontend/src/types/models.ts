@@ -20,6 +20,7 @@ export type LeaveType   = 'annual' | 'sick' | 'parental' | 'unpaid'
 export interface LeaveRequest {
   id: string
   employee_id: string
+  employee_name: string | null
   leave_type: LeaveType
   start_date: string
   end_date: string

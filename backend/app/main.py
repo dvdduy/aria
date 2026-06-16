@@ -1,16 +1,33 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import agent, auth, employees, health, leave, payroll, policies
 from app.core.config import settings
+from app.core.database import SessionLocal
 from app.core.logging import configure_logging
+from app.core.seed import seed_dev_data
 
 configure_logging()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if settings.app_env == "development":
+        db = SessionLocal()
+        try:
+            seed_dev_data(db)
+        finally:
+            db.close()
+    yield
+
 
 app = FastAPI(
     title="Aria - AI HR Workflow Agent",
     version=settings.app_version,
     docs_url="/docs" if settings.app_env == "development" else None,
+    lifespan=lifespan,
 )
 
 app.add_middleware(

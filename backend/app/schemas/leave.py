@@ -18,6 +18,7 @@ class LeaveRequestReject(BaseModel):
 class LeaveRequestResponse(BaseModel):
     id: str
     employee_id: str
+    employee_name: str | None
     leave_type: str
     start_date: date
     end_date: date
