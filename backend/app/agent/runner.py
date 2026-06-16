@@ -46,7 +46,6 @@ class AgentRunner:
                 for block in response.content:
                     if block.type == "tool_use":
                         result = dispatch_tool(block.name, block.input, db, tool_context)
-                        logger.info("tool_called", tool=block.name, session_id=session_id)
                         tool_results.append({
                             "type": "tool_result",
                             "tool_use_id": block.id,
