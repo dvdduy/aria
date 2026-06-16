@@ -67,14 +67,15 @@ TOOL_DEFINITIONS = [
     },
     {
         "name": "get_payroll_summary",
-        "description": "Return payroll records for an employee for a given period.",
+        "description": "Return payroll records for the current user's own employee profile.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "employee_id": {"type": "string"},
-                "period": {"type": "string", "description": "e.g. Q1 2026, March 2026, 2025"},
+                "period": {
+                    "type": "string",
+                    "description": "Optional period label, such as May 2026",
+                },
             },
-            "required": ["employee_id"],
         },
     },
     {
