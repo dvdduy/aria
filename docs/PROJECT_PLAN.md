@@ -148,6 +148,7 @@ Detailed guide:
 - [E2-S1 User Employee Link](development/E2-S1-user-employee-link.md)
 - [E2-S2 Direct Reports](development/E2-S2-direct-reports.md)
 - [E2-S3 Manager Relationship Check](development/E2-S3-manager-relationship-check.md)
+- [E2-S5 My Profile](development/E2-S5-my-profile.md)
 
 ### Stories
 
@@ -157,7 +158,7 @@ Detailed guide:
 | E2-S2 | As a manager, I can see my direct reports. | P0 | Verified |
 | E2-S3 | As the backend, I can answer whether one employee reports to another. | P0 | Verified |
 | E2-S4 | As an admin, I can create and update employee records. | P2 | Not Started |
-| E2-S5 | As a user, I can view my own profile information. | P1 | Not Started |
+| E2-S5 | As a user, I can view my own profile information. | P1 | Verified |
 
 ### Acceptance Criteria
 
@@ -178,11 +179,15 @@ Detailed guide:
 
 **Goal:** Build the first end-to-end HR workflow.
 
+Detailed guide:
+
+- [E3-S1 My Leave Requests](development/E3-S1-my-leave-requests.md)
+
 ### Stories
 
 | Story ID | User Story | Priority | Status |
 | --- | --- | --- | --- |
-| E3-S1 | As an employee, I can view my own leave requests and statuses. | P0 | Not Started |
+| E3-S1 | As an employee, I can view my own leave requests and statuses. | P0 | Verified |
 | E3-S2 | As an employee, I can submit a leave request with type, date range, and reason. | P0 | Not Started |
 | E3-S3 | As a manager, I can view pending leave requests for my direct reports. | P0 | Not Started |
 | E3-S4 | As a manager, I can approve a direct report's leave request. | P0 | Not Started |
