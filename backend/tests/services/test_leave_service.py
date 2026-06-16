@@ -10,6 +10,7 @@ from app.services.leave_service import (
     LeaveAuthorizationError,
     LeaveRequestNotFoundError,
     approve_leave_request,
+    get_leave_request_for_employee,
     list_leave_requests_for_employee,
     list_pending_leave_requests_for_manager,
     submit_leave_request,
@@ -263,3 +264,89 @@ def test_approve_leave_request_rejects_missing_request(db):
 
     with pytest.raises(LeaveRequestNotFoundError):
         approve_leave_request(db, manager, "00000000-0000-0000-0000-000000000000")
+
+
+def test_get_leave_request_for_employee_allows_owner(db):
+    employee = Employee(email="employee@example.com", full_name="Example Employee")
+    db.add(employee)
+    db.commit()
+    db.refresh(employee)
+
+    request = LeaveRequest(
+        employee_id=employee.id,
+        leave_type="annual",
+        start_date=date(2026, 7, 1),
+        end_date=date(2026, 7, 5),
+        days_requested=5,
+        status="pending",
+    )
+    db.add(request)
+    db.commit()
+    db.refresh(request)
+
+    result = get_leave_request_for_employee(db, employee, request.id)
+
+    assert result.id == request.id
+
+
+def test_get_leave_request_for_employee_allows_direct_manager(db):
+    manager = Employee(email="manager@example.com", full_name="Example Manager")
+    db.add(manager)
+    db.commit()
+    db.refresh(manager)
+
+    direct_report = Employee(
+        email="report@example.com",
+        full_name="Direct Report",
+        manager_id=manager.id,
+    )
+    db.add(direct_report)
+    db.commit()
+    db.refresh(direct_report)
+
+    request = LeaveRequest(
+        employee_id=direct_report.id,
+        leave_type="annual",
+        start_date=date(2026, 7, 1),
+        end_date=date(2026, 7, 5),
+        days_requested=5,
+        status="pending",
+    )
+    db.add(request)
+    db.commit()
+    db.refresh(request)
+
+    result = get_leave_request_for_employee(db, manager, request.id)
+
+    assert result.id == request.id
+
+
+def test_get_leave_request_for_employee_blocks_unrelated_employee(db):
+    employee = Employee(email="employee@example.com", full_name="Example Employee")
+    other_employee = Employee(email="other@example.com", full_name="Other Employee")
+    db.add_all([employee, other_employee])
+    db.commit()
+    db.refresh(employee)
+    db.refresh(other_employee)
+
+    request = LeaveRequest(
+        employee_id=other_employee.id,
+        leave_type="annual",
+        start_date=date(2026, 7, 1),
+        end_date=date(2026, 7, 5),
+        days_requested=5,
+        status="pending",
+    )
+    db.add(request)
+    db.commit()
+    db.refresh(request)
+
+    with pytest.raises(LeaveAuthorizationError):
+        get_leave_request_for_employee(db, employee, request.id)
+
+
+def test_get_leave_request_for_employee_rejects_missing_request(db):
+    employee = Employee(email="employee@example.com", full_name="Example Employee")
+
+    with pytest.raises(LeaveRequestNotFoundError):
+        get_leave_request_for_employee(db, employee, "00000000-0000-0000-0000-000000000000")

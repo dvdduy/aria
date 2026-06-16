@@ -504,3 +504,170 @@ def test_approve_leave_request_returns_404_when_user_has_no_employee_link(client
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Employee profile not linked"
+
+
+def test_get_leave_request_allows_owner(client, db):
+    employee = Employee(email="employee@example.com", full_name="Example Employee")
+    db.add(employee)
+    db.commit()
+    db.refresh(employee)
+
+    request = LeaveRequest(
+        employee_id=employee.id,
+        leave_type="annual",
+        start_date=date(2026, 7, 1),
+        end_date=date(2026, 7, 5),
+        days_requested=5,
+        status="pending",
+        reason="Family vacation",
+    )
+    db.add(request)
+
+    user = User(
+        email="employee@example.com",
+        hashed_password=hash_password("correct-password"),
+        employee_id=employee.id,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    db.refresh(request)
+    token = create_access_token(str(user.id), is_admin=user.is_admin)
+
+    response = client.get(
+        f"/api/leave/{request.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["id"] == str(request.id)
+    assert body["employee_id"] == str(employee.id)
+
+
+def test_get_leave_request_allows_direct_manager(client, db):
+    manager = Employee(email="manager@example.com", full_name="Example Manager")
+    db.add(manager)
+    db.commit()
+    db.refresh(manager)
+
+    direct_report = Employee(
+        email="report@example.com",
+        full_name="Direct Report",
+        manager_id=manager.id,
+    )
+    db.add(direct_report)
+    db.commit()
+    db.refresh(direct_report)
+
+    request = LeaveRequest(
+        employee_id=direct_report.id,
+        leave_type="annual",
+        start_date=date(2026, 7, 1),
+        end_date=date(2026, 7, 5),
+        days_requested=5,
+        status="pending",
+    )
+    db.add(request)
+
+    user = User(
+        email="manager@example.com",
+        hashed_password=hash_password("correct-password"),
+        employee_id=manager.id,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    db.refresh(request)
+    token = create_access_token(str(user.id), is_admin=user.is_admin)
+
+    response = client.get(
+        f"/api/leave/{request.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["id"] == str(request.id)
+
+
+def test_get_leave_request_blocks_unrelated_employee(client, db):
+    employee = Employee(email="employee@example.com", full_name="Example Employee")
+    other_employee = Employee(email="other@example.com", full_name="Other Employee")
+    db.add_all([employee, other_employee])
+    db.commit()
+    db.refresh(employee)
+    db.refresh(other_employee)
+
+    request = LeaveRequest(
+        employee_id=other_employee.id,
+        leave_type="annual",
+        start_date=date(2026, 7, 1),
+        end_date=date(2026, 7, 5),
+        days_requested=5,
+        status="pending",
+    )
+    db.add(request)
+
+    user = User(
+        email="employee@example.com",
+        hashed_password=hash_password("correct-password"),
+        employee_id=employee.id,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    db.refresh(request)
+    token = create_access_token(str(user.id), is_admin=user.is_admin)
+
+    response = client.get(
+        f"/api/leave/{request.id}",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Not authorized to access this leave request"
+
+
+def test_get_leave_request_returns_404_for_missing_request(client, db):
+    employee = Employee(email="employee@example.com", full_name="Example Employee")
+    db.add(employee)
+    db.commit()
+    db.refresh(employee)
+
+    user = User(
+        email="employee@example.com",
+        hashed_password=hash_password("correct-password"),
+        employee_id=employee.id,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    token = create_access_token(str(user.id), is_admin=user.is_admin)
+
+    response = client.get(
+        "/api/leave/00000000-0000-0000-0000-000000000000",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Leave request not found"
+
+
+def test_get_leave_request_returns_404_when_user_has_no_employee_link(client, db):
+    user = User(
+        email="unlinked@example.com",
+        hashed_password=hash_password("correct-password"),
+        employee_id=None,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    token = create_access_token(str(user.id), is_admin=user.is_admin)
+
+    response = client.get(
+        "/api/leave/00000000-0000-0000-0000-000000000000",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Employee profile not linked"

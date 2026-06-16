@@ -29,6 +29,25 @@ def list_leave_requests_for_employee(db: Session, employee: Employee) -> list[Le
     )
 
 
+def get_leave_request_for_employee(
+    db: Session,
+    employee: Employee,
+    request_id,
+) -> LeaveRequest:
+    request = db.query(LeaveRequest).filter(LeaveRequest.id == request_id).first()
+    if not request:
+        raise LeaveRequestNotFoundError("Leave request not found")
+
+    if request.employee_id == employee.id:
+        return request
+
+    request_employee = db.query(Employee).filter(Employee.id == request.employee_id).first()
+    if request_employee and can_manage_employee(employee, request_employee):
+        return request
+
+    raise LeaveAuthorizationError("Not authorized to access this leave request")
+
+
 def list_pending_leave_requests_for_manager(
     db: Session,
     manager: Employee,
