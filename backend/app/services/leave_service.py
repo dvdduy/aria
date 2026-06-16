@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.employee import Employee
 from app.models.leave import LeaveRequest
 from app.schemas.leave import LeaveRequestCreate
+from app.services.employee_service import list_direct_reports
 
 
 class InvalidLeaveRequestError(ValueError):
@@ -13,6 +14,25 @@ def list_leave_requests_for_employee(db: Session, employee: Employee) -> list[Le
     return (
         db.query(LeaveRequest)
         .filter(LeaveRequest.employee_id == employee.id)
+        .order_by(LeaveRequest.created_at.desc())
+        .all()
+    )
+
+
+def list_pending_leave_requests_for_manager(
+    db: Session,
+    manager: Employee,
+) -> list[LeaveRequest]:
+    direct_reports = list_direct_reports(db, manager)
+    direct_report_ids = [employee.id for employee in direct_reports]
+    if not direct_report_ids:
+        return []
+    return (
+        db.query(LeaveRequest)
+        .filter(
+            LeaveRequest.employee_id.in_(direct_report_ids),
+            LeaveRequest.status == "pending",
+        )
         .order_by(LeaveRequest.created_at.desc())
         .all()
     )

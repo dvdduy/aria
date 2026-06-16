@@ -9,6 +9,7 @@ from app.services.employee_service import get_employee_for_user
 from app.services.leave_service import (
     InvalidLeaveRequestError,
     list_leave_requests_for_employee,
+    list_pending_leave_requests_for_manager,
     submit_leave_request,
 )
 
@@ -67,3 +68,20 @@ def submit_my_leave_request(
             detail=str(exc),
         ) from exc
     return _serialize_leave_request(request)
+
+
+@router.get("/team/pending", response_model=list[LeaveRequestResponse])
+def get_team_pending_leave_requests(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    manager = get_employee_for_user(db, current_user)
+    if not manager:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee profile not linked",
+        )
+    return [
+        _serialize_leave_request(request)
+        for request in list_pending_leave_requests_for_manager(db, manager)
+    ]

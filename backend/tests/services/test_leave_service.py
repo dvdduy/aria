@@ -8,6 +8,7 @@ from app.schemas.leave import LeaveRequestCreate
 from app.services.leave_service import (
     InvalidLeaveRequestError,
     list_leave_requests_for_employee,
+    list_pending_leave_requests_for_manager,
     submit_leave_request,
 )
 
@@ -87,3 +88,71 @@ def test_submit_leave_request_rejects_end_date_before_start_date(db):
                 reason=None,
             ),
         )
+
+
+def test_list_pending_leave_requests_for_manager_returns_direct_report_pending_requests(db):
+    manager = Employee(email="manager@example.com", full_name="Example Manager")
+    other_manager = Employee(email="other.manager@example.com", full_name="Other Manager")
+    db.add_all([manager, other_manager])
+    db.commit()
+    db.refresh(manager)
+    db.refresh(other_manager)
+
+    direct_report = Employee(
+        email="report@example.com",
+        full_name="Direct Report",
+        manager_id=manager.id,
+    )
+    other_report = Employee(
+        email="other.report@example.com",
+        full_name="Other Report",
+        manager_id=other_manager.id,
+    )
+    db.add_all([direct_report, other_report])
+    db.commit()
+    db.refresh(direct_report)
+    db.refresh(other_report)
+
+    pending_request = LeaveRequest(
+        employee_id=direct_report.id,
+        leave_type="annual",
+        start_date=date(2026, 7, 1),
+        end_date=date(2026, 7, 5),
+        days_requested=5,
+        status="pending",
+    )
+    approved_request = LeaveRequest(
+        employee_id=direct_report.id,
+        leave_type="sick",
+        start_date=date(2026, 8, 1),
+        end_date=date(2026, 8, 1),
+        days_requested=1,
+        status="approved",
+    )
+    other_pending_request = LeaveRequest(
+        employee_id=other_report.id,
+        leave_type="annual",
+        start_date=date(2026, 9, 1),
+        end_date=date(2026, 9, 2),
+        days_requested=2,
+        status="pending",
+    )
+    db.add_all([pending_request, approved_request, other_pending_request])
+    db.commit()
+
+    results = list_pending_leave_requests_for_manager(db, manager)
+
+    assert len(results) == 1
+    assert results[0].employee_id == direct_report.id
+    assert results[0].status == "pending"
+
+
+def test_list_pending_leave_requests_for_manager_returns_empty_list_without_direct_reports(db):
+    manager = Employee(email="manager@example.com", full_name="Example Manager")
+    db.add(manager)
+    db.commit()
+    db.refresh(manager)
+
+    results = list_pending_leave_requests_for_manager(db, manager)
+
+    assert results == []
