@@ -227,6 +227,7 @@ Detailed guide:
 - [E4-S1 Chat Enqueue Job ID](development/E4-S1-chat-enqueue-job-id.md)
 - [E4-S2 Agent Job Status Polling](development/E4-S2-agent-job-status-polling.md)
 - [E4-S3 Agent Job Result Fetch](development/E4-S3-agent-job-result-fetch.md)
+- [E4-S4 Conversation Session Memory](development/E4-S4-conversation-session-memory.md)
 - [E4-S5 Friendly Agent Job Failures](development/E4-S5-friendly-agent-job-failures.md)
 - [E4-S6 Agent Tool Trace Steps](development/E4-S6-agent-tool-trace-steps.md)
 - [E4-S7 Agent Job Ownership](development/E4-S7-agent-job-ownership.md)
@@ -238,7 +239,7 @@ Detailed guide:
 | E4-S1 | As a user, I can submit a chat message and immediately receive a job ID. | P0 | Verified |
 | E4-S2 | As a user, I can poll job status until the response is ready. | P0 | Verified |
 | E4-S3 | As a user, I can fetch the completed job result. | P0 | Verified |
-| E4-S4 | As a user, I can maintain a conversation session. | P1 | Scaffolded |
+| E4-S4 | As a user, I can maintain a conversation session. | P1 | Verified |
 | E4-S5 | As a user, failed jobs show a friendly message instead of a stack trace. | P0 | Verified |
 | E4-S6 | As a user, I can see tool trace steps for agent actions. | P1 | Verified |
 | E4-S7 | As the backend, agent jobs are scoped to the user who created them. | P0 | Verified |

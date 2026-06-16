@@ -26,6 +26,7 @@ class AgentRunner:
         tool_trace = []
         history = self._load_history(session_id, user_id, db)
         history.append({"role": "user", "content": message})
+        self._save_to_memory(session_id, user_id, "user", message, db)
 
         for iteration in range(settings.agent_max_iterations):
             response = self.client.messages.create(
