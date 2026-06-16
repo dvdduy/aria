@@ -1,6 +1,8 @@
+import pytest
+
 from app.models.user import User
 from app.schemas.auth import LoginRequest, RegisterRequest
-from app.services.auth_service import login_user, register_user
+from app.services.auth_service import DuplicateEmailError, login_user, register_user
 
 
 def test_register_user_creates_user_and_returns_token(db):
@@ -55,3 +57,18 @@ def test_login_user_returns_none_for_invalid_password(db):
     )
 
     assert result is None
+
+
+def test_register_user_rejects_duplicate_email(db):
+    payload = RegisterRequest(
+        email="employee@example.com",
+        password="correct-password",
+        full_name="Example Employee",
+    )
+
+    register_user(db, payload)
+
+    with pytest.raises(DuplicateEmailError):
+        register_user(db, payload)
+
+    assert db.query(User).filter(User.email == "employee@example.com").count() == 1

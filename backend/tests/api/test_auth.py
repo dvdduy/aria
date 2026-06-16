@@ -14,6 +14,21 @@ def test_register_endpoint_returns_token(client):
     assert body["access_token"]
 
 
+def test_register_endpoint_rejects_duplicate_email(client):
+    payload = {
+        "email": "employee@example.com",
+        "password": "correct-password",
+        "full_name": "Example Employee",
+    }
+
+    first = client.post("/api/auth/register", json=payload)
+    second = client.post("/api/auth/register", json=payload)
+
+    assert first.status_code == 201
+    assert second.status_code == 409
+    assert second.json()["detail"] == "Email is already registered"
+
+
 def test_login_endpoint_returns_token_after_registration(client):
     client.post(
         "/api/auth/register",
