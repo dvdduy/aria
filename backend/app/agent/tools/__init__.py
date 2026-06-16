@@ -9,6 +9,7 @@ from app.agent.tools.leave_tools import (
 from app.agent.tools.notification_tools import send_notification
 from app.agent.tools.payroll_tools import get_payroll_summary
 from app.agent.tools.policy_tools import get_policy
+from app.agent.tools.responses import tool_failed, unknown_tool
 
 TOOL_MAP = {
     "get_employee_info": get_employee_info,
@@ -25,16 +26,8 @@ TOOL_MAP = {
 def dispatch_tool(name: str, inputs: dict, db, context: ToolContext) -> dict:
     fn = TOOL_MAP.get(name)
     if not fn:
-        return {
-            "error": "unknown_tool",
-            "tool": name,
-            "message": f"Unknown tool: {name}",
-        }
+        return unknown_tool(name)
     try:
         return fn(db=db, context=context, **inputs)
-    except Exception as exc:
-        return {
-            "error": "tool_failed",
-            "tool": name,
-            "message": str(exc),
-        }
+    except Exception:
+        return tool_failed(name)

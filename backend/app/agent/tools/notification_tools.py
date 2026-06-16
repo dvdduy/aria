@@ -3,11 +3,8 @@
 from sqlalchemy.orm import Session
 
 from app.agent.tools.context import ToolContext
+from app.agent.tools.responses import not_implemented
 
 
 def send_notification(db: Session, context: ToolContext, **kwargs) -> dict:
-    return {
-        "error": "not_implemented",
-        "tool": "send_notification",
-        "message": "This agent tool is scaffolded but not implemented yet.",
-    }
+    return not_implemented("send_notification")

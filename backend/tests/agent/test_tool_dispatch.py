@@ -81,5 +81,5 @@ def test_dispatch_tool_returns_safe_error_for_tool_failure(
     assert result == {
         "error": "tool_failed",
         "tool": "failing_tool",
-        "message": "boom",
+        "message": "The tool failed while processing the request.",
     }

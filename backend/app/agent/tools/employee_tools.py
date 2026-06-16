@@ -3,20 +3,13 @@
 from sqlalchemy.orm import Session
 
 from app.agent.tools.context import ToolContext
+from app.agent.tools.responses import profile_not_linked
 from app.models.employee import Employee
-
-
-def _profile_not_linked(tool_name: str) -> dict:
-    return {
-        "error": "profile_not_linked",
-        "tool": tool_name,
-        "message": "Your user account is not linked to an employee profile.",
-    }
 
 
 def get_employee_info(db: Session, context: ToolContext, **kwargs) -> dict:
     if not context.employee:
-        return _profile_not_linked("get_employee_info")
+        return profile_not_linked("get_employee_info")
 
     return {
         "tool": "get_employee_info",

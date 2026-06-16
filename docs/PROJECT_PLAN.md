@@ -261,6 +261,7 @@ Detailed guide:
 - [E5-S2 Employee Agent Read Tools](development/E5-S2-employee-agent-read-tools.md)
 - [E5-S3 Manager Agent Leave Tools](development/E5-S3-manager-agent-leave-tools.md)
 - [E5-S4 Payroll Agent Access Control](development/E5-S4-payroll-agent-access-control.md)
+- [E5-S6 Agent Tool Error Contract](development/E5-S6-agent-tool-error-contract.md)
 
 ### Stories
 
@@ -271,7 +272,7 @@ Detailed guide:
 | E5-S3 | As a manager, agent tools can read and update direct-report leave requests. | P0 | Verified |
 | E5-S4 | As an employee, agent tools cannot read another employee's payroll. | P0 | Verified |
 | E5-S5 | As an admin, agent tools can perform broader HR actions where explicitly allowed. | P1 | Not Started |
-| E5-S6 | As a user, unsupported tool requests return a clear not-implemented or not-authorized response. | P0 | Scaffolded |
+| E5-S6 | As a user, unsupported tool requests return a clear not-implemented or not-authorized response. | P0 | Verified |
 | E5-S7 | As an operator, every tool call is logged with tool name, user, and result summary. | P1 | Not Started |
 
 ### Acceptance Criteria

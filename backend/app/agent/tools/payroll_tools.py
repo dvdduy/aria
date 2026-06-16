@@ -3,13 +3,14 @@
 from sqlalchemy.orm import Session
 
 from app.agent.tools.context import ToolContext
+from app.agent.tools.responses import profile_not_linked
 from app.models.payroll import PayrollRecord
 from app.services.payroll_service import list_payroll_records_for_employee
 
 
 def get_payroll_summary(db: Session, context: ToolContext, **kwargs) -> dict:
     if not context.employee:
-        return _profile_not_linked("get_payroll_summary")
+        return profile_not_linked("get_payroll_summary")
 
     return {
         "tool": "get_payroll_summary",
@@ -17,14 +18,6 @@ def get_payroll_summary(db: Session, context: ToolContext, **kwargs) -> dict:
             _serialize_payroll_record(record)
             for record in list_payroll_records_for_employee(db, context.employee)
         ],
-    }
-
-
-def _profile_not_linked(tool_name: str) -> dict:
-    return {
-        "error": "profile_not_linked",
-        "tool": tool_name,
-        "message": "Your user account is not linked to an employee profile.",
     }
 
 
