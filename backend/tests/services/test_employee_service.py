@@ -1,7 +1,11 @@
 from app.core.security import hash_password
 from app.models.employee import Employee
 from app.models.user import User
-from app.services.employee_service import get_employee_for_user, list_direct_reports
+from app.services.employee_service import (
+    can_manage_employee,
+    get_employee_for_user,
+    list_direct_reports,
+)
 
 
 def test_get_employee_for_user_returns_linked_employee(db):
@@ -78,3 +82,57 @@ def test_list_direct_reports_returns_only_active_direct_reports(db):
     results = list_direct_reports(db, manager)
 
     assert [employee.email for employee in results] == ["report@example.com"]
+
+
+def test_can_manage_employee_returns_true_for_direct_report(db):
+    manager = Employee(
+        email="manager@example.com",
+        full_name="Example Manager",
+    )
+    db.add(manager)
+    db.commit()
+    db.refresh(manager)
+
+    employee = Employee(
+        email="employee@example.com",
+        full_name="Example Employee",
+        manager_id=manager.id,
+    )
+
+    assert can_manage_employee(manager, employee) is True
+
+
+def test_can_manage_employee_returns_false_for_non_report(db):
+    manager = Employee(
+        email="manager@example.com",
+        full_name="Example Manager",
+    )
+    other_manager = Employee(
+        email="other.manager@example.com",
+        full_name="Other Manager",
+    )
+    db.add_all([manager, other_manager])
+    db.commit()
+    db.refresh(other_manager)
+
+    employee = Employee(
+        email="employee@example.com",
+        full_name="Example Employee",
+        manager_id=other_manager.id,
+    )
+
+    assert can_manage_employee(manager, employee) is False
+
+
+def test_can_manage_employee_returns_false_when_employee_has_no_manager(db):
+    manager = Employee(
+        email="manager@example.com",
+        full_name="Example Manager",
+    )
+    employee = Employee(
+        email="employee@example.com",
+        full_name="Example Employee",
+        manager_id=None,
+    )
+
+    assert can_manage_employee(manager, employee) is False

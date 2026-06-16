@@ -17,3 +17,9 @@ def list_direct_reports(db: Session, manager: Employee) -> list[Employee]:
         .order_by(Employee.full_name)
         .all()
     )
+
+
+def can_manage_employee(manager: Employee, employee: Employee) -> bool:
+    if not employee.manager_id:
+        return False
+    return employee.manager_id == manager.id

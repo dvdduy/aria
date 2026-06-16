@@ -147,6 +147,7 @@ Detailed guide:
 
 - [E2-S1 User Employee Link](development/E2-S1-user-employee-link.md)
 - [E2-S2 Direct Reports](development/E2-S2-direct-reports.md)
+- [E2-S3 Manager Relationship Check](development/E2-S3-manager-relationship-check.md)
 
 ### Stories
 
@@ -154,7 +155,7 @@ Detailed guide:
 | --- | --- | --- | --- |
 | E2-S1 | As an employee, my user account can be linked to an employee record. | P0 | Verified |
 | E2-S2 | As a manager, I can see my direct reports. | P0 | Verified |
-| E2-S3 | As the backend, I can answer whether one employee reports to another. | P0 | Not Started |
+| E2-S3 | As the backend, I can answer whether one employee reports to another. | P0 | Verified |
 | E2-S4 | As an admin, I can create and update employee records. | P2 | Not Started |
 | E2-S5 | As a user, I can view my own profile information. | P1 | Not Started |
 
