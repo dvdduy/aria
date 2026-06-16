@@ -1,6 +1,14 @@
 from datetime import date, datetime
+from typing import Literal
 
 from pydantic import BaseModel
+
+
+class LeaveRequestCreate(BaseModel):
+    leave_type: Literal["annual", "sick", "parental", "unpaid"]
+    start_date: date
+    end_date: date
+    reason: str | None = None
 
 
 class LeaveRequestResponse(BaseModel):

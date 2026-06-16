@@ -4,9 +4,13 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.models.user import User
-from app.schemas.leave import LeaveRequestResponse
+from app.schemas.leave import LeaveRequestCreate, LeaveRequestResponse
 from app.services.employee_service import get_employee_for_user
-from app.services.leave_service import list_leave_requests_for_employee
+from app.services.leave_service import (
+    InvalidLeaveRequestError,
+    list_leave_requests_for_employee,
+    submit_leave_request,
+)
 
 router = APIRouter()
 
@@ -41,3 +45,25 @@ def get_my_leave_requests(
         _serialize_leave_request(request)
         for request in list_leave_requests_for_employee(db, employee)
     ]
+
+
+@router.post("/mine", response_model=LeaveRequestResponse, status_code=201)
+def submit_my_leave_request(
+    payload: LeaveRequestCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    employee = get_employee_for_user(db, current_user)
+    if not employee:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee profile not linked",
+        )
+    try:
+        request = submit_leave_request(db, employee, payload)
+    except InvalidLeaveRequestError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    return _serialize_leave_request(request)
