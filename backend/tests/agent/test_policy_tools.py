@@ -48,6 +48,32 @@ def test_get_policy_returns_stored_policy_by_category(db):
         "version": "v2.0",
         "effective_date": "2026-01-01",
     }
+    assert result["source"] == {
+        "policy_id": str(policy.id),
+        "title": "Annual Leave Policy",
+        "version": "v2.0",
+        "effective_date": "2026-01-01",
+    }
+    assert result["answer_guidance"] == (
+        "Use only the policy content above and cite Annual Leave Policy v2.0."
+    )
+
+
+def test_get_policy_source_metadata_handles_missing_effective_date(db):
+    policy = HRPolicy(
+        title="Annual Leave Policy",
+        category="leave",
+        content="Employees receive annual leave according to plan rules.",
+    )
+    db.add(policy)
+    db.commit()
+
+    result = get_policy(db, _tool_context(db), category="leave")
+
+    assert result["source"]["effective_date"] is None
+    assert result["answer_guidance"] == (
+        "Use only the policy content above and cite Annual Leave Policy v1.0."
+    )
 
 
 def test_get_policy_returns_stored_policy_by_keyword(db):

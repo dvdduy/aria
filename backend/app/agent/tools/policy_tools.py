@@ -25,6 +25,8 @@ def get_policy(
     return {
         "tool": "get_policy",
         "policy": _serialize_policy(policy),
+        "source": _serialize_policy_source(policy),
+        "answer_guidance": _build_answer_guidance(policy),
     }
 
 
@@ -39,3 +41,18 @@ def _serialize_policy(policy: HRPolicy) -> dict:
             policy.effective_date.isoformat() if policy.effective_date else None
         ),
     }
+
+
+def _serialize_policy_source(policy: HRPolicy) -> dict:
+    return {
+        "policy_id": str(policy.id),
+        "title": policy.title,
+        "version": policy.version,
+        "effective_date": (
+            policy.effective_date.isoformat() if policy.effective_date else None
+        ),
+    }
+
+
+def _build_answer_guidance(policy: HRPolicy) -> str:
+    return f"Use only the policy content above and cite {policy.title} {policy.version}."

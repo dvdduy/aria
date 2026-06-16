@@ -311,6 +311,7 @@ Detailed guide:
 - [E6-S1 Policy Categories](development/E6-S1-policy-categories.md)
 - [E6-S2 Policy Search](development/E6-S2-policy-search.md)
 - [E6-S3 Agent Policy Grounding](development/E6-S3-agent-policy-grounding.md)
+- [E6-S4 Policy Source And Version](development/E6-S4-policy-source-version.md)
 
 ### Stories
 
@@ -319,7 +320,7 @@ Detailed guide:
 | E6-S1 | As a user, I can browse policy categories. | P1 | Verified |
 | E6-S2 | As a user, I can search policy titles and categories. | P1 | Verified |
 | E6-S3 | As a user, I can ask the agent about a policy and receive a grounded answer. | P1 | Verified |
-| E6-S4 | As a user, policy answers identify the source policy and version. | P1 | Not Started |
+| E6-S4 | As a user, policy answers identify the source policy and version. | P1 | Verified |
 | E6-S5 | As an admin, I can create and update policy content. | P2 | Not Started |
 
 ### Acceptance Criteria

@@ -53,7 +53,10 @@ TOOL_DEFINITIONS = [
     },
     {
         "name": "get_policy",
-        "description": "Retrieve an HR policy by category or title keyword.",
+        "description": (
+            "Retrieve stored HR policy content by category or keyword. "
+            "Use the returned source title and version in the final answer."
+        ),
         "input_schema": {
             "type": "object",
             "properties": {
@@ -61,7 +64,10 @@ TOOL_DEFINITIONS = [
                     "type": "string",
                     "description": "leave | payroll | conduct | onboarding",
                 },
-                "keyword": {"type": "string", "description": "Search term in policy title"},
+                "keyword": {
+                    "type": "string",
+                    "description": "Search term in policy title or body content",
+                },
             },
         },
     },
