@@ -1,8 +1,15 @@
 import client from './client'
-import type { LeaveRequest } from '@/types/models'
+import type { LeaveRequest, LeaveType } from '@/types/models'
 
 export interface RejectLeaveRequestPayload {
   rejection_reason: string
+}
+
+export interface SubmitLeaveRequestPayload {
+  leave_type: LeaveType
+  start_date: string
+  end_date: string
+  reason?: string
 }
 
 export const leaveApi = {
@@ -31,6 +38,11 @@ export const leaveApi = {
       `/api/leave/${requestId}/reject`,
       payload,
     )
+    return data
+  },
+
+  async submitLeaveRequest(payload: SubmitLeaveRequestPayload) {
+    const { data } = await client.post<LeaveRequest>('/api/leave/mine', payload)
     return data
   },
 }

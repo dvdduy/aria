@@ -11,7 +11,7 @@ from app.agent.tools.responses import (
     profile_not_linked,
 )
 from app.models.leave import LeaveRequest
-from app.schemas.leave import LeaveRequestReject
+from app.schemas.leave import LeaveRequestCreate, LeaveRequestReject
 from app.services.leave_service import (
     InvalidLeaveRequestError,
     LeaveAuthorizationError,
@@ -20,6 +20,7 @@ from app.services.leave_service import (
     list_leave_requests_for_employee,
     list_pending_leave_requests_for_manager,
     reject_leave_request,
+    submit_leave_request as _do_submit_leave_request,
 )
 
 
@@ -37,7 +38,37 @@ def get_leave_request(db: Session, context: ToolContext, **kwargs) -> dict:
 
 
 def submit_leave_request(db: Session, context: ToolContext, **kwargs) -> dict:
-    return not_implemented("submit_leave_request")
+    if not context.employee:
+        return profile_not_linked("submit_leave_request")
+
+    leave_type = kwargs.get("leave_type")
+    start_date = kwargs.get("start_date")
+    end_date = kwargs.get("end_date")
+    reason = kwargs.get("reason")
+
+    if not leave_type or not start_date or not end_date:
+        return invalid_request(
+            "submit_leave_request",
+            "leave_type, start_date, and end_date are required",
+        )
+
+    try:
+        payload = LeaveRequestCreate(
+            leave_type=leave_type,
+            start_date=start_date,
+            end_date=end_date,
+            reason=reason,
+        )
+        request = _do_submit_leave_request(db, context.employee, payload)
+    except InvalidLeaveRequestError as exc:
+        return invalid_request("submit_leave_request", str(exc))
+    except Exception as exc:
+        return invalid_request("submit_leave_request", f"Invalid input: {exc}")
+
+    return {
+        "tool": "submit_leave_request",
+        "leave_request": _serialize_leave_request(request),
+    }
 
 
 def update_leave_status(db: Session, context: ToolContext, **kwargs) -> dict:

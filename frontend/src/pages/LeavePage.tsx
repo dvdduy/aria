@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { leaveApi } from '@/api/leave'
-import type { LeaveRequest, LeaveStatus } from '@/types/models'
+import { leaveApi, type SubmitLeaveRequestPayload } from '@/api/leave'
+import type { LeaveRequest, LeaveStatus, LeaveType } from '@/types/models'
 import { formatDateRange, formatLeaveType } from '@/utils/leaveFormatting'
 
 type RejectReasons = Record<string, string>
@@ -12,9 +12,12 @@ export interface LeavePageViewProps {
   error: string | null
   actingRequestId: string | null
   rejectReasons: RejectReasons
+  isSubmitting: boolean
+  submitError: string | null
   onApprove: (requestId: string) => void
   onReject: (requestId: string) => void
   onRejectReasonChange: (requestId: string, value: string) => void
+  onSubmitLeave: (payload: SubmitLeaveRequestPayload) => Promise<void>
   onRetry: () => void
 }
 
@@ -170,16 +173,131 @@ function TeamPendingList({
   )
 }
 
+function RequestLeaveForm({
+  isSubmitting,
+  submitError,
+  onSubmit,
+}: {
+  isSubmitting: boolean
+  submitError: string | null
+  onSubmit: (payload: SubmitLeaveRequestPayload) => Promise<void>
+}) {
+  const [leaveType, setLeaveType] = useState<LeaveType>('annual')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [reason, setReason] = useState('')
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!startDate || !endDate) return
+    await onSubmit({
+      leave_type: leaveType,
+      start_date: startDate,
+      end_date: endDate,
+      reason: reason.trim() || undefined,
+    })
+    setLeaveType('annual')
+    setStartDate('')
+    setEndDate('')
+    setReason('')
+  }
+
+  return (
+    <div className="card leave-section">
+      <div className="card-header">
+        <div>
+          <h2 className="card-title">Request leave</h2>
+          <p className="leave-section-subtitle">
+            Submit a new leave request for your manager's review.
+          </p>
+        </div>
+      </div>
+
+      {submitError ? (
+        <div className="toast toast-error leave-error" role="alert">
+          {submitError}
+        </div>
+      ) : null}
+
+      <form className="leave-request-form" onSubmit={(e) => void handleSubmit(e)}>
+        <label className="field">
+          <span className="field-label">Leave type</span>
+          <select
+            className="input select"
+            disabled={isSubmitting}
+            onChange={(e) => setLeaveType(e.target.value as LeaveType)}
+            value={leaveType}
+          >
+            <option value="annual">Annual</option>
+            <option value="sick">Sick</option>
+            <option value="parental">Parental</option>
+            <option value="unpaid">Unpaid</option>
+          </select>
+        </label>
+
+        <div className="leave-date-row">
+          <label className="field">
+            <span className="field-label">Start date</span>
+            <input
+              className="input"
+              disabled={isSubmitting}
+              onChange={(e) => setStartDate(e.target.value)}
+              required
+              type="date"
+              value={startDate}
+            />
+          </label>
+          <label className="field">
+            <span className="field-label">End date</span>
+            <input
+              className="input"
+              disabled={isSubmitting}
+              onChange={(e) => setEndDate(e.target.value)}
+              required
+              type="date"
+              value={endDate}
+            />
+          </label>
+        </div>
+
+        <label className="field">
+          <span className="field-label">Reason (optional)</span>
+          <textarea
+            className="input textarea"
+            disabled={isSubmitting}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Helps your manager understand the context"
+            value={reason}
+          />
+        </label>
+
+        <div className="leave-form-footer">
+          <button
+            className="btn btn-primary btn-sm"
+            disabled={isSubmitting || !startDate || !endDate}
+            type="submit"
+          >
+            {isSubmitting ? 'Submitting...' : 'Submit request'}
+          </button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
 export function LeavePageView({
   actingRequestId,
   error,
   isLoading,
+  isSubmitting,
   myRequests,
   onApprove,
   onReject,
   onRejectReasonChange,
   onRetry,
+  onSubmitLeave,
   rejectReasons,
+  submitError,
   teamRequests,
 }: LeavePageViewProps) {
   const summary = useMemo(
@@ -199,7 +317,7 @@ export function LeavePageView({
           <p className="leave-eyebrow">Leave workflow</p>
           <h1>Leave requests</h1>
           <p className="leave-page-subtitle">
-            Review your leave status and make decisions on pending team requests.
+            Submit requests, review your leave status, and approve team requests.
           </p>
         </div>
         <button
@@ -243,42 +361,50 @@ export function LeavePageView({
       {isLoading ? (
         <div className="card leave-loading">Loading leave requests...</div>
       ) : (
-        <section className="leave-content-grid">
-          <div className="card leave-section">
-            <div className="card-header">
-              <div>
-                <h2 className="card-title">My requests</h2>
-                <p className="leave-section-subtitle">
-                  Your submitted leave requests and current statuses.
-                </p>
-              </div>
-            </div>
-            <LeaveTable
-              emptyBody="Submitted leave requests will appear here once they exist."
-              emptyTitle="No leave requests yet"
-              requests={myRequests}
-            />
-          </div>
+        <>
+          <RequestLeaveForm
+            isSubmitting={isSubmitting}
+            onSubmit={onSubmitLeave}
+            submitError={submitError}
+          />
 
-          <div className="card leave-section">
-            <div className="card-header">
-              <div>
-                <h2 className="card-title">Team pending</h2>
-                <p className="leave-section-subtitle">
-                  Requests from direct reports waiting for a decision.
-                </p>
+          <section className="leave-content-grid">
+            <div className="card leave-section">
+              <div className="card-header">
+                <div>
+                  <h2 className="card-title">My requests</h2>
+                  <p className="leave-section-subtitle">
+                    Your submitted leave requests and current statuses.
+                  </p>
+                </div>
               </div>
+              <LeaveTable
+                emptyBody="Submitted leave requests will appear here once they exist."
+                emptyTitle="No leave requests yet"
+                requests={myRequests}
+              />
             </div>
-            <TeamPendingList
-              actingRequestId={actingRequestId}
-              onApprove={onApprove}
-              onReject={onReject}
-              onRejectReasonChange={onRejectReasonChange}
-              rejectReasons={rejectReasons}
-              requests={teamRequests}
-            />
-          </div>
-        </section>
+
+            <div className="card leave-section">
+              <div className="card-header">
+                <div>
+                  <h2 className="card-title">Team pending</h2>
+                  <p className="leave-section-subtitle">
+                    Requests from direct reports waiting for a decision.
+                  </p>
+                </div>
+              </div>
+              <TeamPendingList
+                actingRequestId={actingRequestId}
+                onApprove={onApprove}
+                onReject={onReject}
+                onRejectReasonChange={onRejectReasonChange}
+                rejectReasons={rejectReasons}
+                requests={teamRequests}
+              />
+            </div>
+          </section>
+        </>
       )}
     </main>
   )
@@ -291,6 +417,8 @@ export default function LeavePage() {
   const [actingRequestId, setActingRequestId] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const loadLeaveData = useCallback(async () => {
     setIsLoading(true)
@@ -312,6 +440,21 @@ export default function LeavePage() {
   useEffect(() => {
     void loadLeaveData()
   }, [loadLeaveData])
+
+  const handleSubmitLeave = async (payload: SubmitLeaveRequestPayload) => {
+    setIsSubmitting(true)
+    setSubmitError(null)
+    try {
+      await leaveApi.submitLeaveRequest(payload)
+      await loadLeaveData()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unable to submit request'
+      setSubmitError(message)
+      throw err
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const handleApprove = async (requestId: string) => {
     setActingRequestId(requestId)
@@ -358,12 +501,15 @@ export default function LeavePage() {
       actingRequestId={actingRequestId}
       error={error}
       isLoading={isLoading}
+      isSubmitting={isSubmitting}
       myRequests={myRequests}
       onApprove={(requestId) => void handleApprove(requestId)}
       onReject={(requestId) => void handleReject(requestId)}
       onRejectReasonChange={handleRejectReasonChange}
       onRetry={() => void loadLeaveData()}
+      onSubmitLeave={handleSubmitLeave}
       rejectReasons={rejectReasons}
+      submitError={submitError}
       teamRequests={teamRequests}
     />
   )
