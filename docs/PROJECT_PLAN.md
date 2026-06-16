@@ -104,7 +104,11 @@ Detailed first-task guide: [E0-S5 Backend Test Environment](development/E0-S5-ba
 
 **Goal:** Users can authenticate, and backend code can make role-based decisions.
 
-Detailed guide: [E1-S3 Duplicate Email Registration](development/E1-S3-duplicate-email-registration.md)
+Detailed guides:
+
+- [E1-S3 Duplicate Email Registration](development/E1-S3-duplicate-email-registration.md)
+- [E1-S4 Inactive User Protected Routes](development/E1-S4-inactive-user-protected-routes.md)
+- [E1-S5 Admin Only Routes](development/E1-S5-admin-only-routes.md)
 
 ### Stories
 
@@ -113,9 +117,9 @@ Detailed guide: [E1-S3 Duplicate Email Registration](development/E1-S3-duplicate
 | E1-S1 | As a user, I can register with email and password so I can access Aria. | P1 | Scaffolded |
 | E1-S2 | As a user, I can log in and receive an access token so protected API calls work. | P0 | Scaffolded |
 | E1-S3 | As a user, I cannot register the same email twice. | P0 | Verified |
-| E1-S4 | As an inactive user, I cannot access protected API routes. | P0 | Scaffolded |
-| E1-S5 | As an admin, I can access admin-only routes. | P1 | Scaffolded |
-| E1-S6 | As a non-admin user, I am blocked from admin-only routes. | P1 | Scaffolded |
+| E1-S4 | As an inactive user, I cannot access protected API routes. | P0 | Verified |
+| E1-S5 | As an admin, I can access admin-only routes. | P1 | Verified |
+| E1-S6 | As a non-admin user, I am blocked from admin-only routes. | P1 | Verified |
 | E1-S7 | As a product owner, I can decide whether refresh tokens are in MVP or deferred. | P1 | Not Started |
 
 ### Acceptance Criteria

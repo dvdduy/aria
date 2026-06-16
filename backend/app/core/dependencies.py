@@ -22,9 +22,11 @@ def get_current_user(
             detail="Invalid token",
         ) from exc
 
-    user = db.query(User).filter(User.id == user_id, User.is_active.is_(True)).first()
+    user = db.query(User).filter(User.id == user_id).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
+    if not user.is_active:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user")
     return user
 
 

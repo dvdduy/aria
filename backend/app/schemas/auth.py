@@ -15,3 +15,10 @@ class LoginRequest(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class CurrentUserResponse(BaseModel):
+    id: str
+    email: EmailStr
+    is_admin: bool
+    is_active: bool
