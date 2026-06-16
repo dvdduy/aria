@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+from app.api import agent, auth, employees, health, leave, payroll, policies
 from app.core.config import settings
 from app.core.logging import configure_logging
-from app.api import auth, agent, employees, leave, policies, payroll, health
 
 configure_logging()
 

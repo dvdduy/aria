@@ -67,7 +67,10 @@ TOOL_DEFINITIONS = [
         "input_schema": {
             "type": "object",
             "properties": {
-                "category": {"type": "string", "description": "leave | payroll | conduct | onboarding"},
+                "category": {
+                    "type": "string",
+                    "description": "leave | payroll | conduct | onboarding",
+                },
                 "keyword": {"type": "string", "description": "Search term in policy title"},
             },
         },

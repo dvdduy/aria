@@ -1,10 +1,11 @@
 from anthropic import Anthropic
 from sqlalchemy.orm import Session
+
+from app.agent.prompts import SYSTEM_PROMPT
+from app.agent.tools import dispatch_tool
+from app.agent.tools.definitions import TOOL_DEFINITIONS
 from app.core.config import settings
 from app.core.logging import logger
-from app.agent.prompts import SYSTEM_PROMPT
-from app.agent.tools.definitions import TOOL_DEFINITIONS
-from app.agent.tools import dispatch_tool
 
 
 class AgentRunner:
@@ -46,7 +47,10 @@ class AgentRunner:
                         })
                 history.append({"role": "user", "content": tool_results})
 
-        return "I was unable to complete this task within the allowed steps. Please try a simpler request."
+        return (
+            "I was unable to complete this task within the allowed steps. "
+            "Please try a simpler request."
+        )
 
     def _load_history(self, session_id: str, user_id: str, db: Session) -> list:
         from app.models.agent_memory import AgentMemory
@@ -60,12 +64,15 @@ class AgentRunner:
         return [{"role": r.role, "content": r.content} for r in records]
 
     def _save_to_memory(self, session_id: str, user_id: str, role: str, content: str, db: Session):
-        from app.models.agent_memory import AgentMemory
         import uuid
-        db.add(AgentMemory(
-            user_id=user_id,
-            session_id=uuid.UUID(session_id) if isinstance(session_id, str) else session_id,
-            role=role,
-            content=content,
-        ))
+
+        from app.models.agent_memory import AgentMemory
+        db.add(
+            AgentMemory(
+                user_id=user_id,
+                session_id=uuid.UUID(session_id) if isinstance(session_id, str) else session_id,
+                role=role,
+                content=content,
+            )
+        )
         db.commit()

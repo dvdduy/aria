@@ -72,6 +72,8 @@ The first complete demo should prove the most important claim: Aria can safely c
 
 **Goal:** Make the repository predictable enough that new features can be added safely.
 
+Detailed first-task guide: [E0-S5 Backend Test Environment](development/E0-S5-backend-test-environment.md)
+
 ### Stories
 
 | Story ID | User Story | Priority | Status |
@@ -80,7 +82,7 @@ The first complete demo should prove the most important claim: Aria can safely c
 | E0-S2 | As a developer, I can run lint with a known config so style and common bugs are caught early. | P0 | Scaffolded |
 | E0-S3 | As a developer, I can see what is implemented versus planned so I do not overstate progress. | P0 | Implemented |
 | E0-S4 | As a developer, I can rely on design tokens matching the interactive mockup so UI work stays consistent. | P1 | Implemented |
-| E0-S5 | As a developer, I can run backend tests locally without depending on secret production-like environment variables. | P0 | Not Started |
+| E0-S5 | As a developer, I can run backend tests locally without depending on secret production-like environment variables. | P0 | Verified |
 
 ### Acceptance Criteria
 

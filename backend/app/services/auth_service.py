@@ -1,7 +1,8 @@
 from sqlalchemy.orm import Session
-from app.core.security import hash_password, verify_password, create_access_token
+
+from app.core.security import create_access_token, hash_password, verify_password
 from app.models.user import User
-from app.schemas.auth import RegisterRequest, LoginRequest
+from app.schemas.auth import LoginRequest, RegisterRequest
 
 
 def register_user(db: Session, payload: RegisterRequest):

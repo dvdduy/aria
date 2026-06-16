@@ -1,12 +1,12 @@
+import uuid
+
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from app.core.database import get_db
+
 from app.core.dependencies import get_current_user
 from app.core.redis import redis_client
-from app.schemas.agent import ChatRequest, ChatEnqueueResponse, JobStatusResponse, JobResultResponse
-from app.tasks.agent_task import run_agent_task
 from app.models.user import User
-import uuid
+from app.schemas.agent import ChatEnqueueResponse, ChatRequest, JobResultResponse, JobStatusResponse
+from app.tasks.agent_task import run_agent_task
 
 router = APIRouter()
 
