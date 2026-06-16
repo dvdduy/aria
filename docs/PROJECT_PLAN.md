@@ -222,6 +222,10 @@ Detailed guide:
 
 **Goal:** Chat requests run through an async agent flow and return useful results.
 
+Detailed guide:
+
+- [E4-S7 Agent Job Ownership](development/E4-S7-agent-job-ownership.md)
+
 ### Stories
 
 | Story ID | User Story | Priority | Status |
@@ -232,7 +236,7 @@ Detailed guide:
 | E4-S4 | As a user, I can maintain a conversation session. | P1 | Scaffolded |
 | E4-S5 | As a user, failed jobs show a friendly message instead of a stack trace. | P0 | Scaffolded |
 | E4-S6 | As a user, I can see tool trace steps for agent actions. | P1 | Scaffolded |
-| E4-S7 | As the backend, agent jobs are scoped to the user who created them. | P0 | Not Started |
+| E4-S7 | As the backend, agent jobs are scoped to the user who created them. | P0 | Verified |
 
 ### Acceptance Criteria
 
