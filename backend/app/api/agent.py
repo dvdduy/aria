@@ -1,3 +1,4 @@
+import json
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -35,7 +36,11 @@ def job_status(job_id: str, current_user: User = Depends(get_current_user)):
 def job_result(job_id: str, current_user: User = Depends(get_current_user)):
     _authorize_job_access(job_id, current_user)
     result = redis_client.get(f"job:{job_id}:result") or ""
-    return {"job_id": job_id, "result": result}
+    return {
+        "job_id": job_id,
+        "result": result,
+        "tool_trace": _get_job_tool_trace(job_id),
+    }
 
 
 def _authorize_job_access(job_id: str, current_user: User) -> None:
@@ -45,3 +50,14 @@ def _authorize_job_access(job_id: str, current_user: User) -> None:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Job not found",
         )
+
+
+def _get_job_tool_trace(job_id: str) -> list[dict]:
+    raw_trace = redis_client.get(f"job:{job_id}:tool_trace")
+    if not raw_trace:
+        return []
+    try:
+        trace = json.loads(raw_trace)
+    except json.JSONDecodeError:
+        return []
+    return trace if isinstance(trace, list) else []

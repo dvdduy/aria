@@ -2,7 +2,7 @@ from anthropic import Anthropic
 from sqlalchemy.orm import Session
 
 from app.agent.prompts import SYSTEM_PROMPT
-from app.agent.tools import dispatch_tool
+from app.agent.tools import build_tool_trace_step, dispatch_tool
 from app.agent.tools.context import build_tool_context
 from app.agent.tools.definitions import TOOL_DEFINITIONS
 from app.core.config import settings
@@ -17,9 +17,13 @@ class AgentRunner:
     def run(self, message: str, session_id: str, user_id: str, db: Session) -> str:
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
-            return "I could not verify your account for this request."
+            return {
+                "message": "I could not verify your account for this request.",
+                "tool_trace": [],
+            }
 
         tool_context = build_tool_context(db, user)
+        tool_trace = []
         history = self._load_history(session_id, user_id, db)
         history.append({"role": "user", "content": message})
 
@@ -38,7 +42,7 @@ class AgentRunner:
                 )
                 self._save_to_memory(session_id, user_id, "assistant", final_text, db)
                 logger.info("agent_done", session_id=session_id, iterations=iteration + 1)
-                return final_text
+                return {"message": final_text, "tool_trace": tool_trace}
 
             if response.stop_reason == "tool_use":
                 history.append({"role": "assistant", "content": response.content})
@@ -46,6 +50,7 @@ class AgentRunner:
                 for block in response.content:
                     if block.type == "tool_use":
                         result = dispatch_tool(block.name, block.input, db, tool_context)
+                        tool_trace.append(build_tool_trace_step(block.name, result))
                         tool_results.append({
                             "type": "tool_result",
                             "tool_use_id": block.id,
@@ -53,10 +58,13 @@ class AgentRunner:
                         })
                 history.append({"role": "user", "content": tool_results})
 
-        return (
-            "I was unable to complete this task within the allowed steps. "
-            "Please try a simpler request."
-        )
+        return {
+            "message": (
+                "I was unable to complete this task within the allowed steps. "
+                "Please try a simpler request."
+            ),
+            "tool_trace": tool_trace,
+        }
 
     def _load_history(self, session_id: str, user_id: str, db: Session) -> list:
         from app.models.agent_memory import AgentMemory

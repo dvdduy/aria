@@ -1,3 +1,5 @@
+import json
+
 from app.api import agent as agent_api
 from app.core.security import create_access_token, hash_password
 from app.models.user import User
@@ -90,7 +92,53 @@ def test_job_result_allows_owner(client, db, monkeypatch):
     )
 
     assert response.status_code == 200
-    assert response.json() == {"job_id": "job-123", "result": "Done"}
+    assert response.json() == {"job_id": "job-123", "result": "Done", "tool_trace": []}
+
+
+def test_job_result_returns_tool_trace_for_owner(client, db, monkeypatch):
+    user = _create_user(db, "owner@example.com")
+    fake_redis = FakeRedis()
+    trace = [
+        {
+            "tool": "list_team_leave",
+            "status": "success",
+            "summary": "leave_requests:1",
+            "error_code": None,
+        }
+    ]
+    fake_redis.set("job:job-123:user_id", str(user.id))
+    fake_redis.set("job:job-123:result", "Done")
+    fake_redis.set("job:job-123:tool_trace", json.dumps(trace))
+    monkeypatch.setattr(agent_api, "redis_client", fake_redis)
+
+    response = client.get(
+        "/api/agent/result/job-123",
+        headers=_auth_headers(user),
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "job_id": "job-123",
+        "result": "Done",
+        "tool_trace": trace,
+    }
+
+
+def test_job_result_defaults_tool_trace_to_empty_list_for_invalid_json(client, db, monkeypatch):
+    user = _create_user(db, "owner@example.com")
+    fake_redis = FakeRedis()
+    fake_redis.set("job:job-123:user_id", str(user.id))
+    fake_redis.set("job:job-123:result", "Done")
+    fake_redis.set("job:job-123:tool_trace", "not-json")
+    monkeypatch.setattr(agent_api, "redis_client", fake_redis)
+
+    response = client.get(
+        "/api/agent/result/job-123",
+        headers=_auth_headers(user),
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"job_id": "job-123", "result": "Done", "tool_trace": []}
 
 
 def test_job_result_returns_friendly_failed_message_for_owner(client, db, monkeypatch):
@@ -110,6 +158,7 @@ def test_job_result_returns_friendly_failed_message_for_owner(client, db, monkey
     assert response.json() == {
         "job_id": "job-123",
         "result": FRIENDLY_AGENT_FAILURE_MESSAGE,
+        "tool_trace": [],
     }
 
 

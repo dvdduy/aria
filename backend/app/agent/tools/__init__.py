@@ -53,6 +53,16 @@ def summarize_tool_result(result: dict) -> str:
     return "success"
 
 
+def build_tool_trace_step(name: str, result: dict) -> dict:
+    error_code = result.get("error")
+    return {
+        "tool": name,
+        "status": "error" if error_code else "success",
+        "summary": summarize_tool_result(result),
+        "error_code": error_code,
+    }
+
+
 def log_tool_result(name: str, result: dict, context: ToolContext) -> None:
     error_code = result.get("error")
     logger.info(

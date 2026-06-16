@@ -1,3 +1,5 @@
+import json
+
 import pytest
 
 from app.tasks import agent_task
@@ -28,7 +30,21 @@ def fake_retry(exc, countdown):
 def test_run_agent_task_stores_done_result(monkeypatch):
     fake_redis = FakeRedis()
     monkeypatch.setattr(agent_task, "redis_client", fake_redis)
-    monkeypatch.setattr(agent_task, "execute_agent_job", lambda **kwargs: "Done")
+    monkeypatch.setattr(
+        agent_task,
+        "execute_agent_job",
+        lambda **kwargs: {
+            "message": "Done",
+            "tool_trace": [
+                {
+                    "tool": "list_team_leave",
+                    "status": "success",
+                    "summary": "leave_requests:1",
+                    "error_code": None,
+                }
+            ],
+        },
+    )
 
     agent_task.run_agent_task_body(
         job_id="job-123",
@@ -40,8 +56,17 @@ def test_run_agent_task_stores_done_result(monkeypatch):
 
     assert fake_redis.get("job:job-123:status") == "done"
     assert fake_redis.get("job:job-123:result") == "Done"
+    assert json.loads(fake_redis.get("job:job-123:tool_trace")) == [
+        {
+            "tool": "list_team_leave",
+            "status": "success",
+            "summary": "leave_requests:1",
+            "error_code": None,
+        }
+    ]
     assert fake_redis.expirations["job:job-123:status"] == agent_task.JOB_TTL_SECONDS
     assert fake_redis.expirations["job:job-123:result"] == agent_task.JOB_TTL_SECONDS
+    assert fake_redis.expirations["job:job-123:tool_trace"] == agent_task.JOB_TTL_SECONDS
 
 
 def test_run_agent_task_stores_friendly_failure_message(monkeypatch):
@@ -64,6 +89,8 @@ def test_run_agent_task_stores_friendly_failure_message(monkeypatch):
 
     assert fake_redis.get("job:job-123:status") == "failed"
     assert fake_redis.get("job:job-123:result") == agent_task.FRIENDLY_AGENT_FAILURE_MESSAGE
+    assert json.loads(fake_redis.get("job:job-123:tool_trace")) == []
     assert "sensitive stack detail" not in fake_redis.get("job:job-123:result")
     assert fake_redis.expirations["job:job-123:status"] == agent_task.JOB_TTL_SECONDS
     assert fake_redis.expirations["job:job-123:result"] == agent_task.JOB_TTL_SECONDS
+    assert fake_redis.expirations["job:job-123:tool_trace"] == agent_task.JOB_TTL_SECONDS

@@ -1,3 +1,5 @@
+import json
+
 from app.core.logging import logger
 from app.core.redis import redis_client
 from app.tasks.celery import celery_app
@@ -29,9 +31,16 @@ def run_agent_task_body(
 
     try:
         result = execute_agent_job(message=message, session_id=session_id, user_id=user_id)
+        result_message = result["message"]
+        tool_trace = result.get("tool_trace", [])
 
         redis_client.set(f"job:{job_id}:status", "done", ex=JOB_TTL_SECONDS)
-        redis_client.set(f"job:{job_id}:result", result, ex=JOB_TTL_SECONDS)
+        redis_client.set(f"job:{job_id}:result", result_message, ex=JOB_TTL_SECONDS)
+        redis_client.set(
+            f"job:{job_id}:tool_trace",
+            json.dumps(tool_trace),
+            ex=JOB_TTL_SECONDS,
+        )
         logger.info("agent_task_completed", job_id=job_id, session_id=session_id)
 
     except Exception as exc:
@@ -42,6 +51,7 @@ def run_agent_task_body(
             FRIENDLY_AGENT_FAILURE_MESSAGE,
             ex=JOB_TTL_SECONDS,
         )
+        redis_client.set(f"job:{job_id}:tool_trace", "[]", ex=JOB_TTL_SECONDS)
         raise retry(exc=exc, countdown=5) from exc
 
 

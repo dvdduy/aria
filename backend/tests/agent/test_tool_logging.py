@@ -50,6 +50,27 @@ def test_summarize_tool_result_handles_errors():
     )
 
 
+def test_build_tool_trace_step_uses_safe_summary():
+    assert agent_tools.build_tool_trace_step(
+        "update_leave_status",
+        {"leave_request": {"status": "approved", "id": "leave-1"}},
+    ) == {
+        "tool": "update_leave_status",
+        "status": "success",
+        "summary": "leave_request:approved",
+        "error_code": None,
+    }
+    assert agent_tools.build_tool_trace_step(
+        "update_leave_status",
+        {"error": "not_authorized", "message": "Not authorized"},
+    ) == {
+        "tool": "update_leave_status",
+        "status": "error",
+        "summary": "error:not_authorized",
+        "error_code": "not_authorized",
+    }
+
+
 def test_dispatch_tool_logs_success(monkeypatch, db, tool_context):
     events = []
 

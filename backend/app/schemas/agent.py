@@ -1,4 +1,6 @@
 
+from typing import Literal
+
 from pydantic import BaseModel
 
 
@@ -17,6 +19,14 @@ class JobStatusResponse(BaseModel):
     status: str  # pending | done | failed
 
 
+class ToolTraceStep(BaseModel):
+    tool: str
+    status: Literal["success", "error"]
+    summary: str
+    error_code: str | None = None
+
+
 class JobResultResponse(BaseModel):
     job_id: str
     result: str
+    tool_trace: list[ToolTraceStep] = []

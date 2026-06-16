@@ -2,7 +2,17 @@ import client from './client'
 
 export interface ChatEnqueueResponse { job_id: string; session_id: string }
 export interface JobStatusResponse   { job_id: string; status: 'pending' | 'done' | 'failed' }
-export interface JobResultResponse   { job_id: string; result: string }
+export interface ToolTraceStep {
+  tool: string
+  status: 'success' | 'error'
+  summary: string
+  error_code?: string | null
+}
+export interface JobResultResponse {
+  job_id: string
+  result: string
+  tool_trace: ToolTraceStep[]
+}
 
 export const agentApi = {
   chat: (message: string, session_id?: string) =>

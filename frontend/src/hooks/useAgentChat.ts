@@ -1,10 +1,11 @@
 import { useState, useRef, useCallback } from 'react'
-import { agentApi } from '@/api/agent'
+import { agentApi, type ToolTraceStep } from '@/api/agent'
 
 export interface Message {
   role: 'user' | 'assistant'
   content: string
   status?: 'thinking' | 'done' | 'error'
+  toolTrace?: ToolTraceStep[]
 }
 
 export function useAgentChat(sessionId?: string) {
@@ -26,7 +27,15 @@ export function useAgentChat(sessionId?: string) {
         if (statusData.status === 'done') {
           clearInterval(pollRef.current!)
           const { data: resultData } = await agentApi.result(job_id)
-          setMessages((prev) => [...prev, { role: 'assistant', content: resultData.result, status: 'done' }])
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'assistant',
+              content: resultData.result,
+              status: 'done',
+              toolTrace: resultData.tool_trace,
+            },
+          ])
           setIsThinking(false)
         }
 
