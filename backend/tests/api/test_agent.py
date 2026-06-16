@@ -1,6 +1,7 @@
 from app.api import agent as agent_api
 from app.core.security import create_access_token, hash_password
 from app.models.user import User
+from app.tasks.agent_task import FRIENDLY_AGENT_FAILURE_MESSAGE
 
 
 class FakeRedis:
@@ -90,6 +91,26 @@ def test_job_result_allows_owner(client, db, monkeypatch):
 
     assert response.status_code == 200
     assert response.json() == {"job_id": "job-123", "result": "Done"}
+
+
+def test_job_result_returns_friendly_failed_message_for_owner(client, db, monkeypatch):
+    user = _create_user(db, "owner@example.com")
+    fake_redis = FakeRedis()
+    fake_redis.set("job:job-123:user_id", str(user.id))
+    fake_redis.set("job:job-123:status", "failed")
+    fake_redis.set("job:job-123:result", FRIENDLY_AGENT_FAILURE_MESSAGE)
+    monkeypatch.setattr(agent_api, "redis_client", fake_redis)
+
+    response = client.get(
+        "/api/agent/result/job-123",
+        headers=_auth_headers(user),
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "job_id": "job-123",
+        "result": FRIENDLY_AGENT_FAILURE_MESSAGE,
+    }
 
 
 def test_job_result_hides_non_owner_job(client, db, monkeypatch):
