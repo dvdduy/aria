@@ -225,6 +225,7 @@ Detailed guide:
 Detailed guide:
 
 - [E4-S1 Chat Enqueue Job ID](development/E4-S1-chat-enqueue-job-id.md)
+- [E4-S2 Agent Job Status Polling](development/E4-S2-agent-job-status-polling.md)
 - [E4-S5 Friendly Agent Job Failures](development/E4-S5-friendly-agent-job-failures.md)
 - [E4-S6 Agent Tool Trace Steps](development/E4-S6-agent-tool-trace-steps.md)
 - [E4-S7 Agent Job Ownership](development/E4-S7-agent-job-ownership.md)
@@ -234,7 +235,7 @@ Detailed guide:
 | Story ID | User Story | Priority | Status |
 | --- | --- | --- | --- |
 | E4-S1 | As a user, I can submit a chat message and immediately receive a job ID. | P0 | Verified |
-| E4-S2 | As a user, I can poll job status until the response is ready. | P0 | Scaffolded |
+| E4-S2 | As a user, I can poll job status until the response is ready. | P0 | Verified |
 | E4-S3 | As a user, I can fetch the completed job result. | P0 | Scaffolded |
 | E4-S4 | As a user, I can maintain a conversation session. | P1 | Scaffolded |
 | E4-S5 | As a user, failed jobs show a friendly message instead of a stack trace. | P0 | Verified |

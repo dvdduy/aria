@@ -122,6 +122,59 @@ def test_job_status_allows_owner(client, db, monkeypatch):
     assert response.json() == {"job_id": "job-123", "status": "done"}
 
 
+def test_job_status_returns_pending_for_owner(client, db, monkeypatch):
+    user = _create_user(db, "owner@example.com")
+    fake_redis = FakeRedis()
+    fake_redis.set("job:job-123:user_id", str(user.id))
+    fake_redis.set("job:job-123:status", "pending")
+    monkeypatch.setattr(agent_api, "redis_client", fake_redis)
+
+    response = client.get(
+        "/api/agent/status/job-123",
+        headers=_auth_headers(user),
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"job_id": "job-123", "status": "pending"}
+
+
+def test_job_status_returns_failed_for_owner(client, db, monkeypatch):
+    user = _create_user(db, "owner@example.com")
+    fake_redis = FakeRedis()
+    fake_redis.set("job:job-123:user_id", str(user.id))
+    fake_redis.set("job:job-123:status", "failed")
+    monkeypatch.setattr(agent_api, "redis_client", fake_redis)
+
+    response = client.get(
+        "/api/agent/status/job-123",
+        headers=_auth_headers(user),
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"job_id": "job-123", "status": "failed"}
+
+
+def test_job_status_defaults_to_pending_when_status_missing(client, db, monkeypatch):
+    user = _create_user(db, "owner@example.com")
+    fake_redis = FakeRedis()
+    fake_redis.set("job:job-123:user_id", str(user.id))
+    monkeypatch.setattr(agent_api, "redis_client", fake_redis)
+
+    response = client.get(
+        "/api/agent/status/job-123",
+        headers=_auth_headers(user),
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"job_id": "job-123", "status": "pending"}
+
+
+def test_job_status_requires_authentication(client):
+    response = client.get("/api/agent/status/job-123")
+
+    assert response.status_code == 403
+
+
 def test_job_status_hides_non_owner_job(client, db, monkeypatch):
     owner = _create_user(db, "owner@example.com")
     other_user = _create_user(db, "other@example.com")
