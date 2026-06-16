@@ -7,6 +7,9 @@ from app.models.leave import LeaveRequest
 from app.schemas.leave import LeaveRequestCreate
 from app.services.leave_service import (
     InvalidLeaveRequestError,
+    LeaveAuthorizationError,
+    LeaveRequestNotFoundError,
+    approve_leave_request,
     list_leave_requests_for_employee,
     list_pending_leave_requests_for_manager,
     submit_leave_request,
@@ -156,3 +159,107 @@ def test_list_pending_leave_requests_for_manager_returns_empty_list_without_dire
     results = list_pending_leave_requests_for_manager(db, manager)
 
     assert results == []
+
+
+def test_approve_leave_request_approves_direct_report_pending_request(db):
+    manager = Employee(email="manager@example.com", full_name="Example Manager")
+    db.add(manager)
+    db.commit()
+    db.refresh(manager)
+
+    direct_report = Employee(
+        email="report@example.com",
+        full_name="Direct Report",
+        manager_id=manager.id,
+    )
+    db.add(direct_report)
+    db.commit()
+    db.refresh(direct_report)
+
+    request = LeaveRequest(
+        employee_id=direct_report.id,
+        leave_type="annual",
+        start_date=date(2026, 7, 1),
+        end_date=date(2026, 7, 5),
+        days_requested=5,
+        status="pending",
+    )
+    db.add(request)
+    db.commit()
+    db.refresh(request)
+
+    result = approve_leave_request(db, manager, request.id)
+
+    assert result.status == "approved"
+    assert result.approved_by == manager.id
+    assert result.approved_at is not None
+
+
+def test_approve_leave_request_rejects_non_manager(db):
+    manager = Employee(email="manager@example.com", full_name="Example Manager")
+    other_manager = Employee(email="other.manager@example.com", full_name="Other Manager")
+    db.add_all([manager, other_manager])
+    db.commit()
+    db.refresh(other_manager)
+
+    employee = Employee(
+        email="employee@example.com",
+        full_name="Example Employee",
+        manager_id=other_manager.id,
+    )
+    db.add(employee)
+    db.commit()
+    db.refresh(employee)
+
+    request = LeaveRequest(
+        employee_id=employee.id,
+        leave_type="annual",
+        start_date=date(2026, 7, 1),
+        end_date=date(2026, 7, 5),
+        days_requested=5,
+        status="pending",
+    )
+    db.add(request)
+    db.commit()
+    db.refresh(request)
+
+    with pytest.raises(LeaveAuthorizationError):
+        approve_leave_request(db, manager, request.id)
+
+
+def test_approve_leave_request_rejects_non_pending_request(db):
+    manager = Employee(email="manager@example.com", full_name="Example Manager")
+    db.add(manager)
+    db.commit()
+    db.refresh(manager)
+
+    direct_report = Employee(
+        email="report@example.com",
+        full_name="Direct Report",
+        manager_id=manager.id,
+    )
+    db.add(direct_report)
+    db.commit()
+    db.refresh(direct_report)
+
+    request = LeaveRequest(
+        employee_id=direct_report.id,
+        leave_type="annual",
+        start_date=date(2026, 7, 1),
+        end_date=date(2026, 7, 5),
+        days_requested=5,
+        status="approved",
+    )
+    db.add(request)
+    db.commit()
+    db.refresh(request)
+
+    with pytest.raises(InvalidLeaveRequestError):
+        approve_leave_request(db, manager, request.id)
+
+
+def test_approve_leave_request_rejects_missing_request(db):
+    manager = Employee(email="manager@example.com", full_name="Example Manager")
+
+    with pytest.raises(LeaveRequestNotFoundError):
+        approve_leave_request(db, manager, "00000000-0000-0000-0000-000000000000")

@@ -184,6 +184,7 @@ Detailed guide:
 - [E3-S1 My Leave Requests](development/E3-S1-my-leave-requests.md)
 - [E3-S2 Submit Leave Request](development/E3-S2-submit-leave-request.md)
 - [E3-S3 Pending Team Leave Requests](development/E3-S3-pending-team-leave-requests.md)
+- [E3-S4 Approve Direct Report Leave](development/E3-S4-approve-direct-report-leave.md)
 
 ### Stories
 
@@ -192,7 +193,7 @@ Detailed guide:
 | E3-S1 | As an employee, I can view my own leave requests and statuses. | P0 | Verified |
 | E3-S2 | As an employee, I can submit a leave request with type, date range, and reason. | P0 | Verified |
 | E3-S3 | As a manager, I can view pending leave requests for my direct reports. | P0 | Verified |
-| E3-S4 | As a manager, I can approve a direct report's leave request. | P0 | Not Started |
+| E3-S4 | As a manager, I can approve a direct report's leave request. | P0 | Verified |
 | E3-S5 | As a manager, I can reject a direct report's leave request with a reason. | P1 | Not Started |
 | E3-S6 | As an employee, I cannot view or modify another employee's leave request. | P0 | Not Started |
 | E3-S7 | As the system, every leave status change records who acted and when. | P0 | Scaffolded |
