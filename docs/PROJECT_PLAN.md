@@ -109,6 +109,7 @@ Detailed guides:
 - [E1-S3 Duplicate Email Registration](development/E1-S3-duplicate-email-registration.md)
 - [E1-S4 Inactive User Protected Routes](development/E1-S4-inactive-user-protected-routes.md)
 - [E1-S5 Admin Only Routes](development/E1-S5-admin-only-routes.md)
+- [E1-S7 Refresh Token Decision](development/E1-S7-refresh-token-decision.md)
 
 ### Stories
 
@@ -120,7 +121,7 @@ Detailed guides:
 | E1-S4 | As an inactive user, I cannot access protected API routes. | P0 | Verified |
 | E1-S5 | As an admin, I can access admin-only routes. | P1 | Verified |
 | E1-S6 | As a non-admin user, I am blocked from admin-only routes. | P1 | Verified |
-| E1-S7 | As a product owner, I can decide whether refresh tokens are in MVP or deferred. | P1 | Not Started |
+| E1-S7 | As a product owner, I can decide whether refresh tokens are in MVP or deferred. | P1 | Verified |
 
 ### Acceptance Criteria
 
@@ -142,11 +143,15 @@ Detailed guides:
 
 **Goal:** Aria understands who a user is as an employee and what team relationships permit.
 
+Detailed guide:
+
+- [E2-S1 User Employee Link](development/E2-S1-user-employee-link.md)
+
 ### Stories
 
 | Story ID | User Story | Priority | Status |
 | --- | --- | --- | --- |
-| E2-S1 | As an employee, my user account can be linked to an employee record. | P0 | Scaffolded |
+| E2-S1 | As an employee, my user account can be linked to an employee record. | P0 | Verified |
 | E2-S2 | As a manager, I can see my direct reports. | P0 | Not Started |
 | E2-S3 | As the backend, I can answer whether one employee reports to another. | P0 | Not Started |
 | E2-S4 | As an admin, I can create and update employee records. | P2 | Not Started |
