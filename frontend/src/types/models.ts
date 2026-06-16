@@ -26,7 +26,9 @@ export interface LeaveRequest {
   days_requested: number
   status: LeaveStatus
   reason: string | null
-  created_at: string
+  approved_by?: string | null
+  approved_at?: string | null
+  created_at?: string
 }
 
 export interface HRPolicy {

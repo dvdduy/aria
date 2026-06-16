@@ -187,6 +187,7 @@ Detailed guide:
 - [E3-S4 Approve Direct Report Leave](development/E3-S4-approve-direct-report-leave.md)
 - [E3-S5 Reject Direct Report Leave](development/E3-S5-reject-direct-report-leave.md)
 - [E3-S6 Leave Request Access Control](development/E3-S6-leave-request-access-control.md)
+- [E3-S8 Leave Page UI](development/E3-S8-leave-page-ui.md)
 
 ### Stories
 
@@ -199,7 +200,7 @@ Detailed guide:
 | E3-S5 | As a manager, I can reject a direct report's leave request with a reason. | P1 | Verified |
 | E3-S6 | As an employee, I cannot view or modify another employee's leave request. | P0 | Verified |
 | E3-S7 | As the system, every leave status change records who acted and when. | P0 | Scaffolded |
-| E3-S8 | As a user, I can review leave requests from the Leave page UI. | P1 | Scaffolded |
+| E3-S8 | As a user, I can review leave requests from the Leave page UI. | P1 | Verified |
 
 ### Acceptance Criteria
 
