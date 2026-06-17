@@ -1,21 +1,25 @@
 from datetime import date, datetime, timezone
 import uuid
+from decimal import Decimal
 
 from sqlalchemy.orm import Session
 
 from app.core.security import hash_password
 from app.models.employee import Employee
 from app.models.leave import LeaveRequest
+from app.models.payroll import PayrollRecord
 from app.models.user import User
 
 
 def seed_dev_data(db: Session):
-    # Idempotency check: skip if employees are already seeded
-    if db.query(Employee).filter(Employee.email == "admin@aria.dev").first():
-        print("Dev data already seeded, skipping")
-        return
+    employees_exist = db.query(Employee).filter(Employee.email == "admin@aria.dev").first()
+    if not employees_exist:
+        _seed_employees_and_leave(db)
 
-    # ── Employees ──────────────────────────────────────────────────────────
+    _seed_payroll_if_missing(db)
+
+
+def _seed_employees_and_leave(db: Session):
     admin_emp = Employee(
         id=uuid.uuid4(),
         email="admin@aria.dev",
@@ -33,7 +37,7 @@ def seed_dev_data(db: Session):
         start_date=date(2021, 3, 1),
     )
     db.add_all([admin_emp, manager_emp])
-    db.flush()  # flush so manager_emp.id is available for the FK below
+    db.flush()
 
     staff_emp = Employee(
         id=uuid.uuid4(),
@@ -47,7 +51,6 @@ def seed_dev_data(db: Session):
     db.add(staff_emp)
     db.flush()
 
-    # ── Users (create or link to employees) ────────────────────────────────
     for email, password, is_admin, emp in [
         ("admin@aria.dev",    "admin123",    True,  admin_emp),
         ("manager@aria.dev",  "manager123",  False, manager_emp),
@@ -65,9 +68,7 @@ def seed_dev_data(db: Session):
                 employee_id=emp.id,
             ))
 
-    # ── Sample leave requests ──────────────────────────────────────────────
     db.add_all([
-        # Staff's pending request (manager can approve/reject)
         LeaveRequest(
             id=uuid.uuid4(),
             employee_id=staff_emp.id,
@@ -78,7 +79,6 @@ def seed_dev_data(db: Session):
             status="pending",
             reason="Summer holiday",
         ),
-        # Staff's approved request
         LeaveRequest(
             id=uuid.uuid4(),
             employee_id=staff_emp.id,
@@ -91,7 +91,6 @@ def seed_dev_data(db: Session):
             approved_by=manager_emp.id,
             approved_at=datetime(2026, 5, 5, 9, 0, tzinfo=timezone.utc),
         ),
-        # Manager's own pending request (approved by nobody yet)
         LeaveRequest(
             id=uuid.uuid4(),
             employee_id=manager_emp.id,
@@ -105,4 +104,44 @@ def seed_dev_data(db: Session):
     ])
 
     db.commit()
-    print("Dev seed data created: 3 employees, 3 users, 3 leave requests")
+    print("Dev seed: 3 employees, 3 users, 3 leave requests")
+
+
+def _seed_payroll_if_missing(db: Session):
+    if db.query(PayrollRecord).first():
+        return
+
+    employees = {
+        e.email: e
+        for e in db.query(Employee).filter(
+            Employee.email.in_(["admin@aria.dev", "manager@aria.dev", "employee@aria.dev"])
+        ).all()
+    }
+    if len(employees) < 3:
+        return
+
+    periods = [
+        (date(2026, 3, 1), date(2026, 3, 31)),
+        (date(2026, 4, 1), date(2026, 4, 30)),
+        (date(2026, 5, 1), date(2026, 5, 31)),
+        (date(2026, 6, 1), date(2026, 6, 30)),
+    ]
+    payroll_data = [
+        (employees["employee@aria.dev"], Decimal("7800.00"),  Decimal("5460.00")),
+        (employees["manager@aria.dev"],  Decimal("12500.00"), Decimal("8500.00")),
+        (employees["admin@aria.dev"],    Decimal("9200.00"),  Decimal("6440.00")),
+    ]
+    for emp, gross, net in payroll_data:
+        for period_start, period_end in periods:
+            db.add(PayrollRecord(
+                id=uuid.uuid4(),
+                employee_id=emp.id,
+                period_start=period_start,
+                period_end=period_end,
+                gross_salary=gross,
+                net_salary=net,
+                currency="CAD",
+            ))
+
+    db.commit()
+    print("Dev seed: 12 payroll records")
