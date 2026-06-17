@@ -187,6 +187,24 @@ export default function AppLayout() {
   }, [location.pathname])
 
   useEffect(() => {
+    const onChanged = (e: Event) => {
+      const id = (e as CustomEvent<{ id?: string }>).detail?.id
+      setActiveSessionId(id)
+    }
+    const onSaved = () => {
+      agentApi.sessions()
+        .then(({ data }) => setSessions(data))
+        .catch(() => {})
+    }
+    window.addEventListener('aria:session-changed', onChanged)
+    window.addEventListener('aria:session-saved', onSaved)
+    return () => {
+      window.removeEventListener('aria:session-changed', onChanged)
+      window.removeEventListener('aria:session-saved', onSaved)
+    }
+  }, [])
+
+  useEffect(() => {
     if (!bellOpen) return
     const handler = (e: MouseEvent) => {
       if (bellRef.current && !bellRef.current.contains(e.target as Node)) {

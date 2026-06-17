@@ -27,6 +27,7 @@ export function useAgentChat() {
     setSessionIdState(id)
     if (id) sessionStorage.setItem(SESSION_KEY, id)
     else sessionStorage.removeItem(SESSION_KEY)
+    window.dispatchEvent(new CustomEvent('aria:session-changed', { detail: { id } }))
   }, [])
 
   // Restore history on mount if a session exists
@@ -87,6 +88,7 @@ export function useAgentChat() {
             },
           ])
           setIsThinking(false)
+          window.dispatchEvent(new CustomEvent('aria:session-saved'))
         }
 
         if (statusData.status === 'failed') {
