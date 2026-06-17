@@ -10,6 +10,7 @@ class EmployeeProfileResponse(BaseModel):
     department: str | None
     role: str | None
     manager_id: str | None
+    manager_name: str | None = None
     start_date: date | None
     is_active: bool
 

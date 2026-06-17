@@ -8,6 +8,7 @@ import TeamPage from '@/pages/TeamPage'
 import PoliciesPage from '@/pages/PoliciesPage'
 import PayrollPage from '@/pages/PayrollPage'
 import EmployeesPage from '@/pages/EmployeesPage'
+import ProfilePage from '@/pages/ProfilePage'
 import DevLoginPage from '@/pages/DevLoginPage'
 
 export const router = createBrowserRouter(
@@ -24,6 +25,7 @@ export const router = createBrowserRouter(
         { path: '/policies',   element: <PoliciesPage /> },
         { path: '/payroll',    element: <PayrollPage /> },
         { path: '/employees',  element: <EmployeesPage /> },
+        { path: '/profile',    element: <ProfilePage /> },
       ],
     },
   ],

@@ -43,6 +43,20 @@ TOOL_DEFINITIONS = [
         },
     },
     {
+        "name": "get_team_member",
+        "description": "Look up a direct report by name. Returns their profile, leave history for the current year, and annual leave balance. Use when a manager asks about a specific team member.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "employee_name": {
+                    "type": "string",
+                    "description": "Full or partial name of the team member (e.g. 'Sarah' or 'Sarah Chen')",
+                },
+            },
+            "required": ["employee_name"],
+        },
+    },
+    {
         "name": "get_leave_balance",
         "description": "Return the current user's annual leave balance for this calendar year — entitlement, days used, and days remaining.",
         "input_schema": {

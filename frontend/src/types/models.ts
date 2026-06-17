@@ -11,6 +11,7 @@ export interface Employee {
   department: string | null
   role: string | null
   manager_id: string | null
+  manager_name: string | null
   start_date: string | null
   is_active: boolean
 }

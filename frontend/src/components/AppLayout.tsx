@@ -208,10 +208,12 @@ export default function AppLayout() {
 
         <div className="sidebar-footer">
           <div className="user-row">
-            <div className="avatar avatar-sm">{initials}</div>
-            <div className="user-info">
-              <div className="user-name">{displayName || 'Unknown'}</div>
-            </div>
+            <NavLink to="/profile" className="user-profile-link">
+              <div className="avatar avatar-sm">{initials}</div>
+              <div className="user-info">
+                <div className="user-name">{displayName || 'Unknown'}</div>
+              </div>
+            </NavLink>
             <button className="btn-icon logout-btn" onClick={handleLogout} title="Sign out" type="button">
               <svg fill="none" height="15" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75" viewBox="0 0 24 24" width="15">
                 <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>

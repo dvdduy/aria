@@ -24,7 +24,7 @@ from app.services.employee_service import (
 router = APIRouter()
 
 
-def _serialize_employee(employee: Employee) -> dict:
+def _serialize_employee(employee: Employee, manager_name: str | None = None) -> dict:
     return {
         "id": str(employee.id),
         "email": employee.email,
@@ -32,6 +32,7 @@ def _serialize_employee(employee: Employee) -> dict:
         "department": employee.department,
         "role": employee.role,
         "manager_id": str(employee.manager_id) if employee.manager_id else None,
+        "manager_name": manager_name,
         "start_date": employee.start_date.isoformat() if employee.start_date else None,
         "is_active": employee.is_active,
     }
@@ -55,7 +56,11 @@ def get_my_employee_profile(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Employee profile not linked",
         )
-    return _serialize_employee(employee)
+    manager_name = None
+    if employee.manager_id:
+        manager = get_employee_by_id(db, str(employee.manager_id))
+        manager_name = manager.full_name if manager else None
+    return _serialize_employee(employee, manager_name=manager_name)
 
 
 @router.get("/direct-reports", response_model=list[EmployeeProfileResponse])
