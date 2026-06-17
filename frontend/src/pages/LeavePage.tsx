@@ -321,11 +321,18 @@ export function LeavePageView({
               const isActing = actingRequestId === request.id
               return (
                 <div className="lt-row" key={request.id}>
-                  <div className="lt-c">
-                    <div className="avatar avatar-sm" style={{ flexShrink: 0, fontSize: '9px' }}>
-                      {(request.employee_name ?? request.employee_id).slice(0, 2).toUpperCase()}
+                  <div className="lt-c" style={{ flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <div className="avatar avatar-sm" style={{ flexShrink: 0, fontSize: '9px' }}>
+                        {(request.employee_name ?? request.employee_id).slice(0, 2).toUpperCase()}
+                      </div>
+                      {request.isOwn ? 'Me' : (request.employee_name ?? `Employee ${request.employee_id.slice(0, 8)}`)}
                     </div>
-                    {request.isOwn ? 'Me' : (request.employee_name ?? `Employee ${request.employee_id.slice(0, 8)}`)}
+                    {request.reason && (
+                      <div style={{ fontSize: 10, color: 'var(--color-text-tertiary)', paddingLeft: 28 }}>
+                        {request.reason}
+                      </div>
+                    )}
                   </div>
                   <div className="lt-c m">{formatLeaveType(request.leave_type)}</div>
                   <div className="lt-c m">{formatDateRange(request.start_date, request.end_date)}</div>

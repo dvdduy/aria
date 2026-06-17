@@ -97,6 +97,19 @@ function getInitials(displayName: string): string {
   return displayName.slice(0, 2).toUpperCase()
 }
 
+function timeAgo(isoStr: string): string {
+  const diff = Date.now() - new Date(isoStr).getTime()
+  const mins = Math.floor(diff / 60000)
+  if (mins < 1) return 'Just now'
+  if (mins < 60) return `${mins}m ago`
+  const hours = Math.floor(mins / 60)
+  if (hours < 24) return `${hours}h ago`
+  const days = Math.floor(hours / 24)
+  if (days === 1) return 'Yesterday'
+  if (days < 7) return `${days}d ago`
+  return new Date(isoStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+}
+
 export default function AppLayout() {
   const navigate = useNavigate()
   const token = sessionStorage.getItem('aria_token') ?? ''
@@ -176,7 +189,8 @@ export default function AppLayout() {
                 ) : (
                   notifications.map((n) => (
                     <div className={`notif-item${n.is_read ? '' : ' unread'}`} key={n.id}>
-                      {n.message}
+                      <div>{n.message}</div>
+                      <div className="notif-time">{timeAgo(n.created_at)}</div>
                     </div>
                   ))
                 )}
