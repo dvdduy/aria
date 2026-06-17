@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { employeesApi } from '@/api/employees'
 import { leaveApi } from '@/api/leave'
@@ -109,9 +109,65 @@ function UpcomingRow({ request }: { request: LeaveRequest }) {
   )
 }
 
-function PendingRow({ request }: { request: LeaveRequest }) {
+function RejectModal({ isActing, onClose, onReject }: {
+  isActing: boolean
+  onClose: () => void
+  onReject: (reason: string) => void
+}) {
+  const [reason, setReason] = useState('')
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  useEffect(() => { textareaRef.current?.focus() }, [])
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  return (
+    <div className="modal-overlay" role="dialog" aria-modal="true" onClick={onClose}>
+      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <span className="modal-title">Reject leave request</span>
+          <button className="btn-icon" onClick={onClose} aria-label="Close" type="button">✕</button>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '2px' }}>
+          <label className="field">
+            <span className="field-label">Rejection reason</span>
+            <textarea
+              ref={textareaRef}
+              className="input textarea"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              placeholder="Required"
+              disabled={isActing}
+            />
+          </label>
+          <div className="leave-form-footer">
+            <button className="btn btn-secondary btn-sm" onClick={onClose} type="button">Cancel</button>
+            <button
+              className="btn btn-danger btn-sm"
+              disabled={isActing || !reason.trim()}
+              onClick={() => { if (reason.trim()) onReject(reason.trim()) }}
+              type="button"
+            >
+              {isActing ? 'Rejecting…' : 'Reject'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PendingRow({ actingId, onApprove, onReject, request }: {
+  request: LeaveRequest
+  actingId: string | null
+  onApprove: (id: string) => void
+  onReject: (request: LeaveRequest) => void
+}) {
   const name = request.employee_name ?? ''
   const colors = avatarColors(name)
+  const isActing = actingId === request.id
   return (
     <div className="list-row">
       <div className="av" style={{ background: colors.bg, color: colors.color, flexShrink: 0 }}>
@@ -120,11 +176,25 @@ function PendingRow({ request }: { request: LeaveRequest }) {
       <div style={{ flex: 1 }}>
         <div className="lname">{name || 'Unknown'}</div>
         <div className="lmeta">
-          {request.leave_type.charAt(0).toUpperCase() + request.leave_type.slice(1)} · {request.days_requested} days
+          {request.leave_type.charAt(0).toUpperCase() + request.leave_type.slice(1)} · {request.days_requested} days · {formatDateRange(request.start_date, request.end_date)}
         </div>
       </div>
-      <div className="ldates">{formatDateRange(request.start_date, request.end_date)}</div>
-      <span className="badge badge-pending">Pending</span>
+      <button
+        className="act-b"
+        disabled={isActing}
+        onClick={() => onApprove(request.id)}
+        type="button"
+      >
+        {isActing ? '…' : 'Approve'}
+      </button>
+      <button
+        className="act-b act-b-danger"
+        disabled={isActing}
+        onClick={() => onReject(request)}
+        type="button"
+      >
+        Reject
+      </button>
     </div>
   )
 }
@@ -137,8 +207,11 @@ export default function DashboardPage() {
   const [teamPending, setTeamPending] = useState<LeaveRequest[]>([])
   const [teamAll, setTeamAll] = useState<LeaveRequest[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [actingId, setActingId] = useState<string | null>(null)
+  const [rejectingRequest, setRejectingRequest] = useState<LeaveRequest | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
 
-  useEffect(() => {
+  const loadData = () =>
     Promise.allSettled([
       employeesApi.getMe(),
       leaveApi.getMyLeaveRequests(),
@@ -151,7 +224,35 @@ export default function DashboardPage() {
       if (all.status === 'fulfilled') setTeamAll(all.value)
       setIsLoading(false)
     })
-  }, [])
+
+  useEffect(() => { void loadData() }, [])
+
+  const handleApprove = async (id: string) => {
+    setActingId(id)
+    setActionError(null)
+    try {
+      await leaveApi.approveLeaveRequest(id)
+      await loadData()
+    } catch {
+      setActionError('Failed to approve request.')
+    } finally {
+      setActingId(null)
+    }
+  }
+
+  const handleReject = async (id: string, reason: string) => {
+    setActingId(id)
+    setActionError(null)
+    try {
+      await leaveApi.rejectLeaveRequest(id, { rejection_reason: reason })
+      setRejectingRequest(null)
+      await loadData()
+    } catch {
+      setActionError('Failed to reject request.')
+    } finally {
+      setActingId(null)
+    }
+  }
 
   const todayStr = getTodayStr()
 
@@ -234,10 +335,29 @@ export default function DashboardPage() {
       {!isLoading && teamPending.length > 0 && (
         <>
           <div className="sec-title">Pending requests</div>
+          {actionError && (
+            <div className="toast toast-error" style={{ marginBottom: 8 }}>{actionError}</div>
+          )}
           <div className="list-card" style={{ marginBottom: 'var(--space-4)' }}>
-            {teamPending.map((r) => <PendingRow key={r.id} request={r} />)}
+            {teamPending.map((r) => (
+              <PendingRow
+                key={r.id}
+                request={r}
+                actingId={actingId}
+                onApprove={(id) => void handleApprove(id)}
+                onReject={(req) => setRejectingRequest(req)}
+              />
+            ))}
           </div>
         </>
+      )}
+
+      {rejectingRequest && (
+        <RejectModal
+          isActing={actingId === rejectingRequest.id}
+          onClose={() => setRejectingRequest(null)}
+          onReject={(reason) => void handleReject(rejectingRequest.id, reason)}
+        />
       )}
 
       {/* quick actions */}
