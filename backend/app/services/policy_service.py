@@ -2,6 +2,7 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.models.policy import HRPolicy
+from app.schemas.policy import PolicyWriteRequest
 
 
 def list_policy_categories(db: Session) -> list[str]:
@@ -51,8 +52,58 @@ def find_policy_for_agent(
             or_(
                 HRPolicy.title.ilike(pattern),
                 HRPolicy.content.ilike(pattern),
+                HRPolicy.category.ilike(pattern),
             )
         )
 
     statement = statement.order_by(HRPolicy.category.asc(), HRPolicy.title.asc())
-    return db.execute(statement).scalars().first()
+    result = db.execute(statement).scalars().first()
+
+    # If category filter returned nothing, retry with keyword-only fallback
+    if result is None and normalized_category and not normalized_keyword:
+        fallback = select(HRPolicy).where(HRPolicy.is_active.is_(True))
+        pattern = f"%{normalized_category}%"
+        fallback = fallback.where(
+            or_(
+                HRPolicy.title.ilike(pattern),
+                HRPolicy.content.ilike(pattern),
+            )
+        )
+        fallback = fallback.order_by(HRPolicy.category.asc(), HRPolicy.title.asc())
+        result = db.execute(fallback).scalars().first()
+
+    return result
+
+
+def get_policy(db: Session, policy_id: str) -> HRPolicy | None:
+    return db.query(HRPolicy).filter(HRPolicy.id == policy_id).first()
+
+
+def create_policy(db: Session, data: PolicyWriteRequest) -> HRPolicy:
+    policy = HRPolicy(
+        title=data.title,
+        category=data.category,
+        content=data.content,
+        version=data.version,
+        effective_date=data.effective_date,
+    )
+    db.add(policy)
+    db.commit()
+    db.refresh(policy)
+    return policy
+
+
+def update_policy(db: Session, policy: HRPolicy, data: PolicyWriteRequest) -> HRPolicy:
+    policy.title = data.title
+    policy.category = data.category
+    policy.content = data.content
+    policy.version = data.version
+    policy.effective_date = data.effective_date
+    db.commit()
+    db.refresh(policy)
+    return policy
+
+
+def deactivate_policy(db: Session, policy: HRPolicy) -> None:
+    policy.is_active = False
+    db.commit()

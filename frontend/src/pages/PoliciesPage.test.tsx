@@ -1,54 +1,56 @@
-import { renderToStaticMarkup } from 'react-dom/server'
-import { describe, expect, it, vi } from 'vitest'
-import { PoliciesPageView } from './PoliciesPage'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
+import PoliciesPage from './PoliciesPage'
+import * as policiesApiModule from '@/api/policies'
 
-const renderView = (overrides: Partial<Parameters<typeof PoliciesPageView>[0]>) =>
-  renderToStaticMarkup(
-    <PoliciesPageView
-      categories={['leave', 'payroll_records']}
-      error={null}
-      isLoading={false}
-      policies={[
-        {
-          id: 'policy-1',
-          title: 'Annual Leave Policy',
-          category: 'leave',
-          version: 'v2.0',
-          effective_date: '2026-01-01',
-        },
-      ]}
-      searchQuery=""
-      searchedQuery=""
-      onRetry={vi.fn()}
-      onSearch={vi.fn()}
-      onSearchQueryChange={vi.fn()}
-      {...overrides}
-    />,
+vi.mock('@/api/policies', () => ({
+  policiesApi: {
+    searchPolicies: vi.fn(),
+    getPolicy: vi.fn(),
+    createPolicy: vi.fn(),
+    updatePolicy: vi.fn(),
+    deletePolicy: vi.fn(),
+  },
+}))
+
+const mockPolicies = [
+  { id: 'p1', title: 'Annual Leave Policy', category: 'leave', version: 'v2.0', effective_date: '2026-01-01' },
+  { id: 'p2', title: 'Payroll & Compensation Policy', category: 'payroll', version: 'v1.2', effective_date: null },
+]
+
+function renderPage() {
+  return render(
+    <MemoryRouter>
+      <PoliciesPage />
+    </MemoryRouter>,
   )
+}
 
-describe('PoliciesPageView', () => {
-  it('renders policy categories and summaries', () => {
-    const markup = renderView({})
+beforeEach(() => {
+  vi.mocked(policiesApiModule.policiesApi.searchPolicies).mockResolvedValue(mockPolicies)
+  sessionStorage.clear()
+})
 
-    expect(markup).toContain('Policies')
-    expect(markup).toContain('Search policies')
-    expect(markup).toContain('Leave')
-    expect(markup).toContain('Payroll Records')
-    expect(markup).toContain('payroll_records')
-    expect(markup).toContain('Annual Leave Policy')
-    expect(markup).toContain('v2.0')
-    expect(markup).toContain('2026-01-01')
+describe('PoliciesPage', () => {
+  it('renders policy list after loading', async () => {
+    renderPage()
+    expect(await screen.findByText('Annual Leave Policy')).toBeTruthy()
+    expect(screen.getByText('Payroll & Compensation Policy')).toBeTruthy()
   })
 
-  it('renders loading, empty, and error states', () => {
-    expect(renderView({ isLoading: true })).toContain('Loading policies...')
-    expect(renderView({ categories: [] })).toContain(
-      'No active policy categories found',
-    )
-    expect(renderView({ policies: [] })).toContain('No active policies found')
-    expect(renderView({ policies: [], searchedQuery: 'leave' })).toContain(
-      'No policies match this search',
-    )
-    expect(renderView({ error: 'Network error' })).toContain('Network error')
+  it('shows filter pills', async () => {
+    renderPage()
+    await screen.findByText('Annual Leave Policy')
+    expect(screen.getByText('All')).toBeTruthy()
+    expect(screen.getByText('Leave')).toBeTruthy()
+    expect(screen.getByText('Payroll')).toBeTruthy()
+  })
+
+  it('shows no admin controls for non-admin users', async () => {
+    renderPage()
+    await screen.findByText('Annual Leave Policy')
+    expect(screen.queryByText('+ New policy')).toBeNull()
+    expect(screen.queryByText('Edit')).toBeNull()
   })
 })

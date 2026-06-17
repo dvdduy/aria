@@ -1,237 +1,317 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { policiesApi } from '@/api/policies'
-import type { HRPolicySummary } from '@/types/models'
+import type { HRPolicy, HRPolicySummary } from '@/types/models'
 
-export interface PoliciesPageViewProps {
-  categories: string[]
-  error: string | null
-  isLoading: boolean
-  policies: HRPolicySummary[]
-  searchQuery: string
-  searchedQuery: string
-  onRetry: () => void
-  onSearch: () => void
-  onSearchQueryChange: (value: string) => void
-}
+// ── helpers ──────────────────────────────────────────────────────────────────
 
-function formatPolicyCategory(category: string) {
-  return category
+function formatCategory(cat: string) {
+  return cat
     .split(/[-_\s]+/)
     .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
     .join(' ')
 }
 
-export function PoliciesPageView({
-  categories,
-  error,
-  isLoading,
-  policies,
-  searchQuery,
-  searchedQuery,
-  onRetry,
-  onSearch,
-  onSearchQueryChange,
-}: PoliciesPageViewProps) {
-  const isFiltered = searchedQuery.trim().length > 0
-
-  return (
-    <main className="policies-page">
-      <header className="policies-page-header">
-        <div>
-          <p className="policies-eyebrow">HR policies</p>
-          <h1>Policies</h1>
-          <p className="policies-page-subtitle">
-            Browse active policy areas and search policy summaries.
-          </p>
-        </div>
-        <button
-          className="btn btn-secondary btn-sm"
-          disabled={isLoading}
-          onClick={onRetry}
-          type="button"
-        >
-          Refresh
-        </button>
-      </header>
-
-      {error ? (
-        <div className="toast toast-error policies-error" role="alert">
-          <div>
-            <strong>Policies could not be loaded.</strong>
-            <div>{error}</div>
-          </div>
-        </div>
-      ) : null}
-
-      {isLoading ? (
-        <div className="card policies-loading">Loading policies...</div>
-      ) : (
-        <>
-          <section className="card policies-search-section">
-            <div className="card-header">
-              <div>
-                <h2 className="card-title">Search policies</h2>
-                <p className="policies-section-subtitle">
-                  Search by policy title or category.
-                </p>
-              </div>
-            </div>
-
-            <form
-              className="policies-search-form"
-              onSubmit={(event) => {
-                event.preventDefault()
-                onSearch()
-              }}
-            >
-              <label className="field policies-search-field">
-                <span className="field-label">Search query</span>
-                <input
-                  className="input"
-                  onChange={(event) =>
-                    onSearchQueryChange(event.currentTarget.value)
-                  }
-                  placeholder="Search title or category"
-                  type="search"
-                  value={searchQuery}
-                />
-              </label>
-              <button className="btn btn-primary" type="submit">
-                Search
-              </button>
-            </form>
-          </section>
-
-          <section aria-label="Policy categories" className="policies-section">
-            <div className="policies-section-header">
-              <h2>Categories</h2>
-              <span>{categories.length}</span>
-            </div>
-
-            {categories.length === 0 ? (
-              <div className="empty-state policies-empty-state">
-                <div className="empty-state-title">
-                  No active policy categories found
-                </div>
-                <div className="empty-state-body">
-                  Active HR policy categories will appear here once policies are
-                  added.
-                </div>
-              </div>
-            ) : (
-              <div className="policies-grid">
-                {categories.map((category) => (
-                  <button
-                    className="card card-clickable policy-category-card"
-                    key={category}
-                    type="button"
-                  >
-                    <span className="policy-category-title">
-                      {formatPolicyCategory(category)}
-                    </span>
-                    <span className="policy-category-key">{category}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </section>
-
-          <section aria-label="Policy results" className="policies-section">
-            <div className="policies-section-header">
-              <h2>{isFiltered ? 'Search results' : 'Active policies'}</h2>
-              <span>{policies.length}</span>
-            </div>
-
-            {policies.length === 0 ? (
-              <div className="empty-state policies-empty-state">
-                <div className="empty-state-title">
-                  {isFiltered
-                    ? 'No policies match this search'
-                    : 'No active policies found'}
-                </div>
-                <div className="empty-state-body">
-                  {isFiltered
-                    ? 'Try another policy title or category.'
-                    : 'Active policy summaries will appear here once policies are added.'}
-                </div>
-              </div>
-            ) : (
-              <div className="table-wrap">
-                <table className="table policies-table">
-                  <thead>
-                    <tr>
-                      <th>Title</th>
-                      <th>Category</th>
-                      <th>Version</th>
-                      <th>Effective</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {policies.map((policy) => (
-                      <tr key={policy.id}>
-                        <td>{policy.title}</td>
-                        <td>{formatPolicyCategory(policy.category)}</td>
-                        <td>{policy.version}</td>
-                        <td>{policy.effective_date ?? 'Not set'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </section>
-        </>
-      )}
-    </main>
-  )
+function formatEffective(date: string | null) {
+  if (!date) return null
+  const d = new Date(date)
+  return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 }
 
-export default function PoliciesPage() {
-  const [categories, setCategories] = useState<string[]>([])
-  const [policies, setPolicies] = useState<HRPolicySummary[]>([])
-  const [error, setError] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [searchedQuery, setSearchedQuery] = useState('')
+function isAdmin(): boolean {
+  try {
+    const token = sessionStorage.getItem('aria_token') ?? ''
+    const claims = JSON.parse(atob(token.split('.')[1])) as { is_admin?: boolean }
+    return claims.is_admin === true
+  } catch {
+    return false
+  }
+}
 
-  const loadPolicyData = useCallback(async (query = '') => {
-    setIsLoading(true)
+// ── policy form modal ─────────────────────────────────────────────────────────
+
+const CATEGORIES = ['leave', 'payroll', 'conduct', 'onboarding']
+
+interface FormState {
+  title: string
+  category: string
+  version: string
+  effective_date: string
+  content: string
+}
+
+const EMPTY_FORM: FormState = {
+  title: '',
+  category: 'leave',
+  version: 'v1.0',
+  effective_date: '',
+  content: '',
+}
+
+interface PolicyModalProps {
+  initial: HRPolicy | null
+  onClose: () => void
+  onSaved: () => void
+}
+
+function PolicyModal({ initial, onClose, onSaved }: PolicyModalProps) {
+  const [form, setForm] = useState<FormState>(
+    initial
+      ? {
+          title: initial.title,
+          category: initial.category,
+          version: initial.version,
+          effective_date: initial.effective_date ?? '',
+          content: initial.content,
+        }
+      : EMPTY_FORM,
+  )
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const set =
+    (field: keyof FormState) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+      setForm((f) => ({ ...f, [field]: e.target.value }))
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSaving(true)
     setError(null)
     try {
-      const [categoryData, policyData] = await Promise.all([
-        policiesApi.getPolicyCategories(),
-        policiesApi.searchPolicies(query),
-      ])
-      setCategories(categoryData.categories)
-      setPolicies(policyData)
-      setSearchedQuery(query.trim())
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unexpected API error')
+      const body = {
+        title: form.title.trim(),
+        category: form.category.trim(),
+        content: form.content.trim(),
+        version: form.version.trim(),
+        effective_date: form.effective_date || null,
+      }
+      if (initial) {
+        await policiesApi.updatePolicy(initial.id, body)
+      } else {
+        await policiesApi.createPolicy(body)
+      }
+      onSaved()
+    } catch {
+      setError('Failed to save policy. Please try again.')
     } finally {
-      setIsLoading(false)
+      setSaving(false)
     }
-  }, [])
-
-  useEffect(() => {
-    void loadPolicyData()
-  }, [loadPolicyData])
-
-  const handleSearch = () => {
-    void loadPolicyData(searchQuery)
   }
 
   return (
-    <PoliciesPageView
-      categories={categories}
-      error={error}
-      isLoading={isLoading}
-      policies={policies}
-      searchQuery={searchQuery}
-      searchedQuery={searchedQuery}
-      onRetry={() => void loadPolicyData(searchedQuery)}
-      onSearch={handleSearch}
-      onSearchQueryChange={setSearchQuery}
-    />
+    <div className="pol-backdrop" onClick={(e) => { if (e.currentTarget === e.target) onClose() }}>
+      <div className="pol-modal" role="dialog" aria-modal="true">
+        <div className="pol-modal-hdr">
+          <h2>{initial ? 'Edit policy' : 'New policy'}</h2>
+          <button className="btn-icon" onClick={onClose} type="button" aria-label="Close">
+            <svg fill="none" height="16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75" viewBox="0 0 24 24" width="16">
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        {error && <div className="toast toast-error pol-error">{error}</div>}
+
+        <form className="pol-modal-body" onSubmit={handleSubmit}>
+          <div className="pol-row">
+            <label className="field pol-field-grow">
+              <span className="field-label">Title *</span>
+              <input className="input" required value={form.title} onChange={set('title')} placeholder="e.g. Annual Leave Policy" />
+            </label>
+            <label className="field">
+              <span className="field-label">Version *</span>
+              <input className="input pol-version-input" required value={form.version} onChange={set('version')} placeholder="v1.0" />
+            </label>
+          </div>
+
+          <div className="pol-row">
+            <label className="field pol-field-grow">
+              <span className="field-label">Category *</span>
+              <select className="input" value={form.category} onChange={set('category')}>
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{formatCategory(c)}</option>
+                ))}
+                {!CATEGORIES.includes(form.category) && (
+                  <option value={form.category}>{formatCategory(form.category)}</option>
+                )}
+              </select>
+            </label>
+            <label className="field">
+              <span className="field-label">Effective date</span>
+              <input className="input" type="date" value={form.effective_date} onChange={set('effective_date')} />
+            </label>
+          </div>
+
+          <label className="field">
+            <span className="field-label">Content *</span>
+            <textarea
+              className="input pol-content-area"
+              required
+              value={form.content}
+              onChange={set('content')}
+              placeholder="Write the full policy text here…"
+            />
+          </label>
+
+          <div className="pol-modal-footer">
+            <button className="btn btn-secondary" type="button" onClick={onClose}>Cancel</button>
+            <button className="btn btn-primary" type="submit" disabled={saving}>
+              {saving ? 'Saving…' : initial ? 'Save changes' : 'Create policy'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
+
+// ── main page ─────────────────────────────────────────────────────────────────
+
+const FILTER_PILLS = ['All', 'Leave', 'Payroll', 'Conduct', 'Onboarding']
+
+export default function PoliciesPage() {
+  const admin = isAdmin()
+  const [allPolicies, setAllPolicies] = useState<HRPolicySummary[]>([])
+  const [search, setSearch] = useState('')
+  const [activeFilter, setActiveFilter] = useState('All')
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // modal state
+  const [modalOpen, setModalOpen] = useState(false)
+  const [editTarget, setEditTarget] = useState<HRPolicy | null>(null)
+
+  const load = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const data = await policiesApi.searchPolicies()
+      setAllPolicies(data)
+    } catch {
+      setError('Could not load policies.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  useEffect(() => { void load() }, [])
+
+  const visible = allPolicies.filter((p) => {
+    const matchesFilter =
+      activeFilter === 'All' || p.category.toLowerCase() === activeFilter.toLowerCase()
+    const q = search.trim().toLowerCase()
+    const matchesSearch =
+      !q || p.title.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
+    return matchesFilter && matchesSearch
+  })
+
+  const openCreate = () => { setEditTarget(null); setModalOpen(true) }
+
+  const openEdit = async (id: string) => {
+    try {
+      const full = await policiesApi.getPolicy(id)
+      setEditTarget(full)
+      setModalOpen(true)
+    } catch {
+      setError('Could not load policy for editing.')
+    }
+  }
+
+  const handleDelete = async (id: string, title: string) => {
+    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return
+    try {
+      await policiesApi.deletePolicy(id)
+      void load()
+    } catch {
+      setError('Failed to delete policy.')
+    }
+  }
+
+  return (
+    <div className="pol-page">
+      {/* topbar */}
+      <div className="page-topbar">
+        <span className="page-topbar-title">HR policies</span>
+        <div className="pol-search-wrap">
+          <svg fill="none" height="13" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="13">
+            <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            className="pol-search-input"
+            placeholder="Search policies…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        {admin && (
+          <button className="btn btn-primary btn-sm" onClick={openCreate} type="button">
+            + New policy
+          </button>
+        )}
+      </div>
+
+      <div className="pp">
+        {error && <div className="toast toast-error" style={{ marginBottom: 12 }}>{error}</div>}
+
+        {/* filter pills */}
+        <div className="filter-row">
+          {FILTER_PILLS.map((pill) => (
+            <button
+              key={pill}
+              className={`fp${activeFilter === pill ? ' active' : ''}`}
+              type="button"
+              onClick={() => setActiveFilter(pill)}
+            >
+              {pill}
+            </button>
+          ))}
+        </div>
+
+        {/* policy list */}
+        {isLoading ? (
+          <div style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)', padding: '12px 0' }}>
+            Loading…
+          </div>
+        ) : visible.length === 0 ? (
+          <div style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)', padding: '12px 0' }}>
+            No policies found.
+          </div>
+        ) : (
+          <div className="list-card">
+            {visible.map((p) => (
+              <div className="list-row" key={p.id}>
+                <div style={{ flex: 1 }}>
+                  <div className="lname">{p.title}</div>
+                  <div className="lmeta">
+                    {formatCategory(p.category)} · {p.version}
+                    {p.effective_date ? ` · ${formatEffective(p.effective_date)}` : ''}
+                  </div>
+                </div>
+                {admin ? (
+                  <div className="pol-actions-cell">
+                    <button className="btn btn-secondary btn-xs" type="button" onClick={() => void openEdit(p.id)}>Edit</button>
+                    <button className="btn btn-danger btn-xs" type="button" onClick={() => void handleDelete(p.id, p.title)}>Delete</button>
+                  </div>
+                ) : (
+                  <span style={{ color: 'var(--color-text-tertiary)', fontSize: 14 }}>›</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <Link className="tb-btn" to="/chat">Ask HR Agent about a policy ↗</Link>
+      </div>
+
+      {modalOpen && (
+        <PolicyModal
+          initial={editTarget}
+          onClose={() => setModalOpen(false)}
+          onSaved={() => { setModalOpen(false); void load() }}
+        />
+      )}
+    </div>
   )
 }

@@ -8,6 +8,7 @@ from app.core.security import hash_password
 from app.models.employee import Employee
 from app.models.leave import LeaveRequest
 from app.models.payroll import PayrollRecord
+from app.models.policy import HRPolicy
 from app.models.user import User
 
 
@@ -18,6 +19,7 @@ def seed_dev_data(db: Session):
 
     _seed_extra_employees_if_missing(db)
     _seed_payroll_if_missing(db)
+    _seed_policies_if_missing(db)
 
 
 def _seed_employees_and_leave(db: Session):
@@ -214,3 +216,98 @@ def _seed_payroll_if_missing(db: Session):
 
     db.commit()
     print(f"Dev seed: {count} payroll records")
+
+
+def _seed_policies_if_missing(db: Session):
+    if db.query(HRPolicy).first():
+        return
+
+    policies = [
+        HRPolicy(
+            id=uuid.uuid4(),
+            title="Annual Leave Policy",
+            category="leave",
+            version="v3.1",
+            effective_date=date(2026, 1, 1),
+            content=(
+                "Employees are entitled to 20 days of paid annual leave per calendar year. "
+                "Leave must be requested at least 5 business days in advance and approved by the direct manager. "
+                "Unused leave up to 5 days may be carried over to the following year. "
+                "Annual leave accrues monthly at 1.67 days per month from the employee's start date."
+            ),
+        ),
+        HRPolicy(
+            id=uuid.uuid4(),
+            title="Sick Leave & Medical Policy",
+            category="leave",
+            version="v2.0",
+            effective_date=date(2024, 8, 1),
+            content=(
+                "Employees are entitled to 10 days of paid sick leave per calendar year. "
+                "Sick leave does not carry over and resets on January 1st each year. "
+                "For absences of 3 or more consecutive days, a medical certificate from a registered physician is required. "
+                "Sick leave may not be used as a substitute for annual leave. "
+                "Employees should notify their manager as early as possible on the first day of absence."
+            ),
+        ),
+        HRPolicy(
+            id=uuid.uuid4(),
+            title="Parental Leave Policy",
+            category="leave",
+            version="v2.1",
+            effective_date=date(2025, 3, 1),
+            content=(
+                "Primary caregivers are entitled to 16 weeks of fully paid parental leave. "
+                "Secondary caregivers are entitled to 4 weeks of fully paid parental leave. "
+                "Parental leave must commence within 12 months of the child's birth or adoption date. "
+                "Employees must provide at least 8 weeks' notice before the intended leave start date. "
+                "Parental leave is available to all employees who have completed 12 months of continuous service."
+            ),
+        ),
+        HRPolicy(
+            id=uuid.uuid4(),
+            title="Payroll & Compensation Policy",
+            category="payroll",
+            version="v1.2",
+            effective_date=date(2025, 11, 1),
+            content=(
+                "Salaries are paid on the last business day of each calendar month via direct deposit. "
+                "All compensation is reviewed annually in Q4, with adjustments effective January 1st. "
+                "Overtime for non-exempt employees is compensated at 1.5x the regular hourly rate. "
+                "Bonuses are discretionary and subject to individual and company performance. "
+                "Payslips are available through the HR portal within 2 business days of the pay date."
+            ),
+        ),
+        HRPolicy(
+            id=uuid.uuid4(),
+            title="Code of Conduct",
+            category="conduct",
+            version="v1.4",
+            effective_date=date(2026, 2, 1),
+            content=(
+                "All employees are expected to act with integrity, respect, and professionalism at all times. "
+                "Harassment, discrimination, or bullying of any kind will not be tolerated and may result in immediate termination. "
+                "Employees must disclose any conflicts of interest to their manager and HR in writing. "
+                "Confidential company information must not be shared externally without written authorisation. "
+                "Violations of this policy should be reported to HR or via the anonymous ethics hotline."
+            ),
+        ),
+        HRPolicy(
+            id=uuid.uuid4(),
+            title="Onboarding & Probation Policy",
+            category="onboarding",
+            version="v1.1",
+            effective_date=date(2025, 6, 1),
+            content=(
+                "All new employees undergo a 90-day probationary period from their start date. "
+                "During probation, employees receive weekly check-ins with their manager and access to the onboarding buddy programme. "
+                "A formal performance review is conducted at the 30-day, 60-day, and 90-day marks. "
+                "Either party may terminate employment during probation with 1 week's written notice. "
+                "Upon successful completion of probation, employees are eligible for the full benefits package."
+            ),
+        ),
+    ]
+
+    db.add_all(policies)
+    db.commit()
+    print(f"Dev seed: {len(policies)} HR policies")

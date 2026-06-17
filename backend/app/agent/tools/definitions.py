@@ -61,11 +61,17 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "category": {
                     "type": "string",
-                    "description": "leave | payroll | conduct | onboarding",
+                    "description": (
+                        "Broad policy category: 'leave' (covers annual, sick, parental, unpaid leave), "
+                        "'payroll' (covers salary, compensation, bonuses), "
+                        "'conduct' (covers code of conduct, behaviour), "
+                        "'onboarding' (covers new hire process). "
+                        "If unsure, omit and rely on keyword instead."
+                    ),
                 },
                 "keyword": {
                     "type": "string",
-                    "description": "Search term in policy title or body content",
+                    "description": "Search term matched against policy title and body content (e.g. 'sick', 'parental')",
                 },
             },
         },

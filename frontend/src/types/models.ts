@@ -40,9 +40,10 @@ export interface HRPolicy {
   content: string
   version: string
   effective_date: string | null
+  is_active: boolean
 }
 
-export type HRPolicySummary = Omit<HRPolicy, 'content'>
+export type HRPolicySummary = Omit<HRPolicy, 'content' | 'is_active'>
 
 export interface Notification {
   id: string
