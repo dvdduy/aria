@@ -842,18 +842,30 @@
   text-align: center;
 }
 
+.notif-group-label {
+  padding: 6px 14px 3px;
+  font-size: 10px;
+  font-weight: var(--weight-medium);
+  color: var(--color-text-tertiary);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .notif-item {
+  display: block;
   padding: 10px 14px;
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   border-bottom: 0.5px solid var(--color-border-subtle);
   line-height: var(--leading-normal);
+  text-decoration: none;
 }
 .notif-item:last-child { border-bottom: none; }
 .notif-item.unread {
   background: var(--color-brand-50);
   color: var(--color-text-primary);
 }
+a.notif-item:hover { background: var(--color-bg-secondary); cursor: pointer; }
 .notif-time {
   font-size: 10px;
   color: var(--color-text-tertiary);

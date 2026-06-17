@@ -112,6 +112,35 @@ function timeAgo(isoStr: string): string {
   return new Date(isoStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
+function notifLink(message: string): string | null {
+  const m = message.toLowerCase()
+  if (m.includes('leave')) return '/leave'
+  if (m.includes('payroll') || m.includes('salary') || m.includes('pay')) return '/payroll'
+  if (m.includes('polic')) return '/policies'
+  return null
+}
+
+function groupNotifications(notifications: Notification[]): { label: string; items: Notification[] }[] {
+  const now = new Date()
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  const yesterdayStart = todayStart - 86400000
+
+  const groups = [
+    { label: 'Today',     items: [] as Notification[] },
+    { label: 'Yesterday', items: [] as Notification[] },
+    { label: 'Earlier',   items: [] as Notification[] },
+  ]
+
+  for (const n of notifications) {
+    const t = new Date(n.created_at).getTime()
+    if (t >= todayStart)      groups[0].items.push(n)
+    else if (t >= yesterdayStart) groups[1].items.push(n)
+    else                      groups[2].items.push(n)
+  }
+
+  return groups.filter((g) => g.items.length > 0)
+}
+
 export default function AppLayout() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -207,10 +236,26 @@ export default function AppLayout() {
                 {notifications.length === 0 ? (
                   <div className="notif-empty">No notifications</div>
                 ) : (
-                  notifications.map((n) => (
-                    <div className={`notif-item${n.is_read ? '' : ' unread'}`} key={n.id}>
-                      <div>{n.message}</div>
-                      <div className="notif-time">{timeAgo(n.created_at)}</div>
+                  groupNotifications(notifications).map((group) => (
+                    <div key={group.label}>
+                      <div className="notif-group-label">{group.label}</div>
+                      {group.items.map((n) => {
+                        const to = notifLink(n.message)
+                        const cls = `notif-item${n.is_read ? '' : ' unread'}`
+                        const body = (
+                          <>
+                            <div>{n.message}</div>
+                            <div className="notif-time">{timeAgo(n.created_at)}</div>
+                          </>
+                        )
+                        return to ? (
+                          <NavLink className={cls} key={n.id} onClick={() => setBellOpen(false)} to={to}>
+                            {body}
+                          </NavLink>
+                        ) : (
+                          <div className={cls} key={n.id}>{body}</div>
+                        )
+                      })}
                     </div>
                   ))
                 )}
