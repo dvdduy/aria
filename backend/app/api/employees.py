@@ -18,6 +18,7 @@ def _serialize_employee(employee):
         "department": employee.department,
         "role": employee.role,
         "manager_id": str(employee.manager_id) if employee.manager_id else None,
+        "start_date": employee.start_date.isoformat() if employee.start_date else None,
         "is_active": employee.is_active,
     }
 

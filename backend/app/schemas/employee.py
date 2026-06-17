@@ -1,3 +1,5 @@
+from datetime import date
+
 from pydantic import BaseModel, EmailStr
 
 
@@ -8,4 +10,5 @@ class EmployeeProfileResponse(BaseModel):
     department: str | None
     role: str | None
     manager_id: str | None
+    start_date: date | None
     is_active: bool

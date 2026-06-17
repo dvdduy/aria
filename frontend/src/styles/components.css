@@ -1389,6 +1389,91 @@
 }
 
 /* ════════════════════════════════════════════
+   SHARED LIST PATTERN (Team, Policies, Dashboard)
+════════════════════════════════════════════ */
+
+/* Small avatar used in list rows */
+.av {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+  background: var(--color-info-50);
+  color: var(--color-info-800);
+}
+
+.list-card {
+  border: 0.5px solid var(--color-border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--space-3);
+}
+
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 12px;
+  border-bottom: 0.5px solid var(--color-border-subtle);
+  background: var(--color-bg-primary);
+}
+.list-row:last-child { border-bottom: none; }
+.list-row:hover { background: var(--color-bg-secondary); }
+
+.lname { font-size: 12px; font-weight: var(--weight-medium); color: var(--color-text-primary); }
+.lmeta { font-size: 11px; color: var(--color-text-secondary); }
+
+/* Pending badge (amber) — team leave status, dashboard */
+.badge-pend {
+  background: var(--color-warning-50);
+  color: var(--color-warning-600);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Toolbar button — "Ask HR Agent ↗" style links */
+.tb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: var(--radius-md);
+  border: 0.5px solid var(--color-border-default);
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  font-family: var(--font-sans);
+  text-decoration: none;
+  transition: background var(--transition-fast);
+}
+.tb-btn:hover { background: var(--color-bg-secondary); }
+
+/* Section title */
+.sec-title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  margin-bottom: 8px;
+}
+
+/* ════════════════════════════════════════════
+   TEAM PAGE
+════════════════════════════════════════════ */
+
+.teamp { padding: var(--space-4); overflow-y: auto; flex: 1; }
+
+
+/* ════════════════════════════════════════════
    PAYROLL PAGE
 ════════════════════════════════════════════ */
 
