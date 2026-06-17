@@ -116,9 +116,11 @@ export default function CalendarPage() {
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
   const [requests, setRequests] = useState<LeaveRequest[]>([])
-  const [, setMyName] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const monthDiff = (year - now.getFullYear()) * 12 + (month - now.getMonth())
+  const goToToday = () => { setYear(now.getFullYear()); setMonth(now.getMonth()) }
 
   useEffect(() => {
     Promise.allSettled([
@@ -139,7 +141,6 @@ export default function CalendarPage() {
       }
 
       const name = meRes.status === 'fulfilled' ? meRes.value.full_name : null
-      setMyName(name)
 
       if (myRes.status === 'fulfilled') addAll(myRes.value, name ?? undefined)
       if (teamRes.status === 'fulfilled') addAll(teamRes.value)
@@ -203,6 +204,27 @@ export default function CalendarPage() {
             <svg fill="none" height="14" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="14">
               <polyline points="9 18 15 12 9 6"/>
             </svg>
+          </button>
+          <button
+            className="btn btn-secondary btn-sm"
+            disabled={monthDiff === 0}
+            onClick={goToToday}
+            type="button"
+          >
+            {monthDiff === 0 ? (
+              <svg fill="currentColor" height="7" viewBox="0 0 8 8" width="7">
+                <circle cx="4" cy="4" r="4"/>
+              </svg>
+            ) : monthDiff > 0 ? (
+              <svg fill="none" height="11" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="11">
+                <polyline points="15 18 9 12 15 6"/>
+              </svg>
+            ) : (
+              <svg fill="none" height="11" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="11">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            )}
+            Today
           </button>
         </div>
       </div>

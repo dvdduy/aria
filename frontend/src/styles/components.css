@@ -67,7 +67,7 @@
 /* Icon-only focus */
 /* Size variants */
 .btn-xs { padding: 2px 8px; font-size: 11px; border-radius: var(--radius-sm); }
-.btn-sm { padding: 4px 10px; font-size: var(--text-xs); border-radius: var(--radius-sm); }
+.btn-sm { padding: 4px 10px; font-size: var(--text-xs); border-radius: var(--radius-sm); gap: 4px; }
 .btn-lg { padding: 10px 20px; font-size: var(--text-base); border-radius: var(--radius-lg); }
 
 /* Icon-only */
