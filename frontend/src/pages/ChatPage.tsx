@@ -91,7 +91,7 @@ function ThinkingBubble() {
 }
 
 export default function ChatPage() {
-  const { messages, isThinking, send, reset } = useAgentChat()
+  const { messages, isThinking, isLoadingHistory, send, reset } = useAgentChat()
   const [input, setInput] = useState('')
   const [suggestions, setSuggestions] = useState(EMPLOYEE_SUGGESTIONS)
   const bottomRef = useRef<HTMLDivElement>(null)
@@ -112,7 +112,7 @@ export default function ChatPage() {
       .catch(() => {})
   }, [])
 
-  const isEmpty = messages.length === 0 && !isThinking
+  const isEmpty = messages.length === 0 && !isThinking && !isLoadingHistory
   const hasResponse = messages.some((m) => m.role === 'assistant')
 
   // Scroll to bottom on new content

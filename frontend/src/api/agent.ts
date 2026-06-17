@@ -14,6 +14,11 @@ export interface JobResultResponse {
   tool_trace: ToolTraceStep[]
 }
 
+export interface HistoryMessage {
+  role: 'user' | 'assistant'
+  content: string
+}
+
 export const agentApi = {
   chat: (message: string, session_id?: string) =>
     client.post<ChatEnqueueResponse>('/api/agent/chat', { message, session_id }),
@@ -23,4 +28,7 @@ export const agentApi = {
 
   result: (job_id: string) =>
     client.get<JobResultResponse>(`/api/agent/result/${job_id}`),
+
+  history: (session_id: string) =>
+    client.get<HistoryMessage[]>(`/api/agent/history/${session_id}`),
 }

@@ -2,9 +2,12 @@ import json
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
+from app.core.database import get_db
 from app.core.dependencies import get_current_user
 from app.core.redis import redis_client
+from app.models.agent_memory import AgentMemory
 from app.models.user import User
 from app.schemas.agent import ChatEnqueueResponse, ChatRequest, JobResultResponse, JobStatusResponse
 from app.tasks.agent_task import run_agent_task
@@ -41,6 +44,38 @@ def job_result(job_id: str, current_user: User = Depends(get_current_user)):
         "result": result,
         "tool_trace": _get_job_tool_trace(job_id),
     }
+
+
+@router.get("/history/{session_id}")
+def get_chat_history(
+    session_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    records = (
+        db.query(AgentMemory)
+        .filter(
+            AgentMemory.session_id == session_id,
+            AgentMemory.user_id == current_user.id,
+        )
+        .order_by(AgentMemory.created_at)
+        .all()
+    )
+    messages = []
+    for r in records:
+        if r.role not in ("user", "assistant"):
+            continue
+        try:
+            parsed = json.loads(r.content)
+            # Skip internal tool blocks (lists) and tool result dicts
+            if isinstance(parsed, (list, dict)):
+                continue
+            text = str(parsed)
+        except (json.JSONDecodeError, ValueError):
+            text = r.content
+        if text.strip():
+            messages.append({"role": r.role, "content": text})
+    return messages
 
 
 def _authorize_job_access(job_id: str, current_user: User) -> None:
