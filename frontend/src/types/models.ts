@@ -44,6 +44,13 @@ export interface HRPolicy {
 
 export type HRPolicySummary = Omit<HRPolicy, 'content'>
 
+export interface Notification {
+  id: string
+  message: string
+  is_read: boolean
+  created_at: string
+}
+
 export interface PayrollRecord {
   id: string
   employee_id: string

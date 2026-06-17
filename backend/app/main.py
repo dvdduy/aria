@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import agent, auth, employees, health, leave, payroll, policies
+from app.api import agent, auth, employees, health, leave, notifications, payroll, policies
 from app.core.config import settings
 from app.core.database import SessionLocal
 from app.core.logging import configure_logging
@@ -45,3 +45,4 @@ app.include_router(employees.router, prefix="/api/employees", tags=["employees"]
 app.include_router(leave.router, prefix="/api/leave", tags=["leave"])
 app.include_router(policies.router, prefix="/api/policies", tags=["policies"])
 app.include_router(payroll.router, prefix="/api/payroll", tags=["payroll"])
+app.include_router(notifications.router, prefix="/api/notifications", tags=["notifications"])

@@ -1,4 +1,7 @@
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { notificationsApi } from '@/api/notifications'
+import type { Notification } from '@/types/models'
 
 const NAV = [
   {
@@ -90,6 +93,47 @@ export default function AppLayout() {
   const displayName = name ?? email ?? ''
   const initials = displayName ? getInitials(displayName) : '?'
 
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [bellOpen, setBellOpen] = useState(false)
+  const bellRef = useRef<HTMLDivElement>(null)
+
+  const fetchNotifications = () => {
+    notificationsApi.getMyNotifications()
+      .then(({ notifications: n, unread_count }) => {
+        setNotifications(n)
+        setUnreadCount(unread_count)
+      })
+      .catch(() => {})
+  }
+
+  useEffect(() => {
+    fetchNotifications()
+    const interval = setInterval(fetchNotifications, 30_000)
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    if (!bellOpen) return
+    const handler = (e: MouseEvent) => {
+      if (bellRef.current && !bellRef.current.contains(e.target as Node)) {
+        setBellOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [bellOpen])
+
+  const handleBellClick = () => {
+    if (!bellOpen && unreadCount > 0) {
+      notificationsApi.markAllRead().then(() => {
+        setUnreadCount(0)
+        setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })))
+      }).catch(() => {})
+    }
+    setBellOpen((o) => !o)
+  }
+
   const handleLogout = () => {
     sessionStorage.removeItem('aria_token')
     navigate('/login')
@@ -102,6 +146,31 @@ export default function AppLayout() {
           <div className="sidebar-app-name">
             <div className="sidebar-logo">A</div>
             Aria
+          </div>
+          <div className="notif-wrap" ref={bellRef}>
+            <button className="btn-icon notif-bell" onClick={handleBellClick} type="button" title="Notifications">
+              <svg fill="none" height="16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75" viewBox="0 0 24 24" width="16">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              {unreadCount > 0 && (
+                <span className="notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+              )}
+            </button>
+            {bellOpen && (
+              <div className="notif-dropdown">
+                <div className="notif-hdr">Notifications</div>
+                {notifications.length === 0 ? (
+                  <div className="notif-empty">No notifications</div>
+                ) : (
+                  notifications.map((n) => (
+                    <div className={`notif-item${n.is_read ? '' : ' unread'}`} key={n.id}>
+                      {n.message}
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
           </div>
         </div>
 
