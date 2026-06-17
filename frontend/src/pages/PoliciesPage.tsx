@@ -70,6 +70,12 @@ function PolicyModal({ initial, onClose, onSaved }: PolicyModalProps) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
   const set =
     (field: keyof FormState) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -178,6 +184,12 @@ interface PolicyDrawerProps {
 }
 
 function PolicyDrawer({ policy, admin, onClose, onEdit, onDelete }: PolicyDrawerProps) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
   return (
     <>
       <div className="pol-drawer-backdrop" onClick={onClose} />
