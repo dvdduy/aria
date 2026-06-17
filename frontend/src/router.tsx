@@ -9,6 +9,7 @@ import PoliciesPage from '@/pages/PoliciesPage'
 import PayrollPage from '@/pages/PayrollPage'
 import EmployeesPage from '@/pages/EmployeesPage'
 import ProfilePage from '@/pages/ProfilePage'
+import CalendarPage from '@/pages/CalendarPage'
 import DevLoginPage from '@/pages/DevLoginPage'
 
 export const router = createBrowserRouter(
@@ -21,6 +22,7 @@ export const router = createBrowserRouter(
         { path: '/',           element: <DashboardPage /> },
         { path: '/chat',       element: <ChatPage /> },
         { path: '/leave',      element: <LeavePage /> },
+        { path: '/calendar',   element: <CalendarPage /> },
         { path: '/team',       element: <TeamPage /> },
         { path: '/policies',   element: <PoliciesPage /> },
         { path: '/payroll',    element: <PayrollPage /> },
