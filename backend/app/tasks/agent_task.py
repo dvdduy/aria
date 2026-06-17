@@ -55,7 +55,7 @@ def run_agent_task_body(
         raise retry(exc=exc, countdown=5) from exc
 
 
-def execute_agent_job(message: str, session_id: str, user_id: str) -> str:
+def execute_agent_job(message: str, session_id: str, user_id: str) -> dict:
     # Lazy imports avoid circular dependencies during worker startup.
     from app.agent.runner import AgentRunner
     from app.core.database import SessionLocal

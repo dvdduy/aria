@@ -44,13 +44,20 @@ TOOL_DEFINITIONS = [
     },
     {
         "name": "get_team_member",
-        "description": "Look up a direct report by name. Returns their profile, leave history for the current year, and annual leave balance. Use when a manager asks about a specific team member.",
+        "description": (
+            "Look up a direct report by name. Returns their profile, leave history for the "
+            "current year, and annual leave balance. Use when a manager asks about a specific "
+            "team member."
+        ),
         "input_schema": {
             "type": "object",
             "properties": {
                 "employee_name": {
                     "type": "string",
-                    "description": "Full or partial name of the team member (e.g. 'Sarah' or 'Sarah Chen')",
+                    "description": (
+                        "Full or partial name of the team member "
+                        "(e.g. 'Sarah' or 'Sarah Chen')"
+                    ),
                 },
             },
             "required": ["employee_name"],
@@ -58,7 +65,10 @@ TOOL_DEFINITIONS = [
     },
     {
         "name": "get_leave_balance",
-        "description": "Return the current user's annual leave balance for this calendar year — entitlement, days used, and days remaining.",
+        "description": (
+            "Return the current user's annual leave balance for this calendar year — "
+            "entitlement, days used, and days remaining."
+        ),
         "input_schema": {
             "type": "object",
             "properties": {},
@@ -73,7 +83,10 @@ TOOL_DEFINITIONS = [
                 "status": {
                     "type": "string",
                     "enum": ["pending", "approved", "rejected", "all"],
-                    "description": "Filter by status. Defaults to 'pending'. Use 'approved' to see who is currently on leave, 'all' for full history.",
+                    "description": (
+                        "Filter by status. Defaults to 'pending'. "
+                        "Use 'approved' to see who is currently on leave, 'all' for full history."
+                    ),
                 },
             },
         },
@@ -90,7 +103,8 @@ TOOL_DEFINITIONS = [
                 "category": {
                     "type": "string",
                     "description": (
-                        "Broad policy category: 'leave' (covers annual, sick, parental, unpaid leave), "
+                        "Broad policy category: 'leave' (covers annual, sick, parental, "
+                        "unpaid leave), "
                         "'payroll' (covers salary, compensation, bonuses), "
                         "'conduct' (covers code of conduct, behaviour), "
                         "'onboarding' (covers new hire process). "
@@ -99,7 +113,10 @@ TOOL_DEFINITIONS = [
                 },
                 "keyword": {
                     "type": "string",
-                    "description": "Search term matched against policy title and body content (e.g. 'sick', 'parental')",
+                    "description": (
+                        "Search term matched against policy title and body content "
+                        "(e.g. 'sick', 'parental')"
+                    ),
                 },
             },
         },

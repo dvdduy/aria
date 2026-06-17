@@ -76,7 +76,4 @@ React Query manages server state for all non-agent endpoints (leave, team, polic
 
 ## Known Limitations
 
-- Several agent tools are still placeholders with no real DB logic.
-- Agent tool calls are not yet user-scope-authorized — a tool could theoretically read data belonging to other users.
-- Backend tests are scaffolded but lack meaningful assertions.
-- Job status lookups are not tied to the requesting user (any authenticated user can poll any job ID).
+- The `send_notification` agent tool requires an `employee_id`, so the agent must obtain this from a prior lookup rather than resolving by name.

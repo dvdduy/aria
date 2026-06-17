@@ -7,4 +7,7 @@ from app.models.payroll import PayrollRecord
 from app.models.policy import HRPolicy
 from app.models.user import User
 
-__all__ = ["User", "Employee", "LeaveRequest", "HRPolicy", "PayrollRecord", "AgentMemory", "Notification"]
+__all__ = [
+    "User", "Employee", "LeaveRequest", "HRPolicy",
+    "PayrollRecord", "AgentMemory", "Notification",
+]

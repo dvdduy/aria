@@ -6,4 +6,9 @@ export const payrollApi = {
     const { data } = await client.get<PayrollRecord[]>('/api/payroll/mine')
     return data
   },
+
+  async getEmployeePayroll(employeeId: string) {
+    const { data } = await client.get<PayrollRecord[]>(`/api/payroll/employee/${employeeId}`)
+    return data
+  },
 }

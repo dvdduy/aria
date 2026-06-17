@@ -1,9 +1,9 @@
-from pydantic import ConfigDict, Field
-from pydantic_settings import BaseSettings
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = ConfigDict(env_file=".env", populate_by_name=True)
+    model_config = SettingsConfigDict(env_file=".env", populate_by_name=True)
 
     # App
     app_env: str = Field("development", alias="APP_ENV")
@@ -31,4 +31,4 @@ class Settings(BaseSettings):
     agent_timeout_seconds: int = Field(30, alias="AGENT_TIMEOUT_SECONDS")
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[call-arg]

@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from app.agent.tools.context import ToolContext
 from app.agent.tools.employee_tools import get_employee_info, get_team_member
 from app.agent.tools.leave_tools import (
@@ -13,7 +15,7 @@ from app.agent.tools.policy_tools import get_policy
 from app.agent.tools.responses import tool_failed, unknown_tool
 from app.core.logging import logger
 
-TOOL_MAP = {
+TOOL_MAP: dict[str, Callable[..., dict]] = {
     "get_employee_info": get_employee_info,
     "get_team_member": get_team_member,
     "get_leave_request": get_leave_request,

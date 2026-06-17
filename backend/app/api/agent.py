@@ -72,7 +72,7 @@ def list_sessions(
             if r.role == "user" and preview is None:
                 try:
                     parsed = json.loads(r.content)
-                    if isinstance(parsed, (list, dict)):
+                    if isinstance(parsed, list | dict):
                         continue
                     text = str(parsed).strip()
                 except (json.JSONDecodeError, ValueError):
@@ -114,7 +114,7 @@ def get_chat_history(
         try:
             parsed = json.loads(r.content)
             # Skip internal tool blocks (lists) and tool result dicts
-            if isinstance(parsed, (list, dict)):
+            if isinstance(parsed, list | dict):
                 continue
             text = str(parsed)
         except (json.JSONDecodeError, ValueError):

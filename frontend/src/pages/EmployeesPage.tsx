@@ -57,6 +57,12 @@ interface EmployeeModalProps {
 function EmployeeModal({ initial, employees, onClose, onSaved }: EmployeeModalProps) {
   const isEdit = initial !== null
 
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
   const [form, setForm] = useState<FormState>(
     initial
       ? {
@@ -287,8 +293,26 @@ export default function EmployeesPage() {
             Loading…
           </div>
         ) : visible.length === 0 ? (
-          <div style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)', padding: '12px 0' }}>
-            No employees found.
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <svg fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="20">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+              </svg>
+            </div>
+            {search.trim() ? (
+              <>
+                <div className="empty-state-title">No employees match "{search.trim()}"</div>
+                <div className="empty-state-body">Try a different name, role, department, or email.</div>
+                <button className="btn btn-secondary btn-sm" style={{ marginTop: 12 }} onClick={() => setSearch('')} type="button">Clear search</button>
+              </>
+            ) : (
+              <>
+                <div className="empty-state-title">No employees yet</div>
+                <div className="empty-state-body">Create the first employee to get started.</div>
+              </>
+            )}
           </div>
         ) : (
           <div className="list-card">
@@ -306,7 +330,8 @@ export default function EmployeesPage() {
                       {!emp.is_active && <span className="emp-badge-inactive">Inactive</span>}
                     </div>
                     <div className="lmeta">
-                      {[emp.role, emp.department].filter(Boolean).join(' · ')}
+                      {emp.email}
+                      {[emp.role, emp.department].filter(Boolean).length > 0 && ` · ${[emp.role, emp.department].filter(Boolean).join(' · ')}`}
                       {managerName ? ` · Reports to ${managerName}` : ''}
                     </div>
                   </div>

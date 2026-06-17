@@ -101,7 +101,9 @@ def get_team_pending_leave_requests(
     return [
         _serialize_leave_request(
             r,
-            employee_name=employees[r.employee_id].full_name if r.employee_id in employees else None,
+            employee_name=(
+                employees[r.employee_id].full_name if r.employee_id in employees else None
+            ),
         )
         for r in requests
     ]
@@ -114,7 +116,9 @@ def get_all_team_leave_requests(
 ):
     manager = get_employee_for_user(db, current_user)
     if not manager:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee profile not linked")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Employee profile not linked"
+        )
     requests = list_all_leave_requests_for_manager(db, manager)
     employee_ids = {r.employee_id for r in requests}
     employees: dict = {}
@@ -126,7 +130,9 @@ def get_all_team_leave_requests(
     return [
         _serialize_leave_request(
             r,
-            employee_name=employees[r.employee_id].full_name if r.employee_id in employees else None,
+            employee_name=(
+                employees[r.employee_id].full_name if r.employee_id in employees else None
+            ),
         )
         for r in requests
     ]
@@ -205,7 +211,9 @@ def cancel_my_leave_request(
 ):
     employee = get_employee_for_user(db, current_user)
     if not employee:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee profile not linked")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Employee profile not linked"
+        )
     try:
         request = cancel_leave_request(db, employee, request_id)
     except LeaveRequestNotFoundError as exc:

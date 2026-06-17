@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
-from app.core.dependencies import get_current_user
+from app.core.dependencies import get_current_user, require_admin
 from app.models.user import User
-from app.services.employee_service import get_employee_for_user
+from app.services.employee_service import get_employee_by_id, get_employee_for_user
 from app.services.payroll_service import list_payroll_records_for_employee
 
 router = APIRouter()
@@ -29,6 +29,22 @@ def get_my_payroll(
 ):
     employee = get_employee_for_user(db, current_user)
     if not employee:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee profile not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee profile not found",
+        )
+    records = list_payroll_records_for_employee(db, employee)
+    return [_serialize(r) for r in records]
+
+
+@router.get("/employee/{employee_id}")
+def get_employee_payroll(
+    employee_id: str,
+    db: Session = Depends(get_db),
+    _admin: User = Depends(require_admin),
+):
+    employee = get_employee_by_id(db, employee_id)
+    if not employee:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee not found")
     records = list_payroll_records_for_employee(db, employee)
     return [_serialize(r) for r in records]

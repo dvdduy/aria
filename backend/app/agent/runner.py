@@ -17,7 +17,7 @@ class AgentRunner:
     def __init__(self):
         self.client = Anthropic(api_key=settings.anthropic_api_key)
 
-    def run(self, message: str, session_id: str, user_id: str, db: Session) -> str:
+    def run(self, message: str, session_id: str, user_id: str, db: Session) -> dict:
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             return {
@@ -26,7 +26,7 @@ class AgentRunner:
             }
 
         tool_context = build_tool_context(db, user)
-        tool_trace = []
+        tool_trace: list[dict] = []
         history = self._load_history(session_id, user_id, db)
         history.append({"role": "user", "content": message})
         self._save_to_memory(session_id, user_id, "user", message, db)
@@ -101,7 +101,7 @@ class AgentRunner:
 
     def _save_to_memory(self, session_id: str, user_id: str, role: str, content, db: Session):
         from app.models.agent_memory import AgentMemory
-        if isinstance(content, (list, dict)):
+        if isinstance(content, list | dict):
             content_str = json.dumps(content)
         else:
             content_str = content

@@ -1,5 +1,5 @@
-from datetime import date, datetime, timezone
 import uuid
+from datetime import UTC, date, datetime
 from decimal import Decimal
 
 from sqlalchemy.orm import Session
@@ -92,7 +92,7 @@ def _seed_employees_and_leave(db: Session):
             status="approved",
             reason="Flu",
             approved_by=manager_emp.id,
-            approved_at=datetime(2026, 5, 5, 9, 0, tzinfo=timezone.utc),
+            approved_at=datetime(2026, 5, 5, 9, 0, tzinfo=UTC),
         ),
         LeaveRequest(
             id=uuid.uuid4(),
@@ -118,12 +118,23 @@ def _seed_extra_employees_if_missing(db: Session):
     if not manager:
         return
 
+    dept = "Engineering"
     extra = [
-        Employee(id=uuid.uuid4(), email="sarah.chen@aria.dev",  full_name="Sarah Chen",  department="Engineering", role="Software Engineer",  manager_id=manager.id, start_date=date(2022, 3, 14)),
-        Employee(id=uuid.uuid4(), email="james.kim@aria.dev",   full_name="James Kim",   department="Engineering", role="Product Designer",   manager_id=manager.id, start_date=date(2023, 1, 9)),
-        Employee(id=uuid.uuid4(), email="maria.lopez@aria.dev", full_name="Maria Lopez", department="Engineering", role="Senior Engineer",    manager_id=manager.id, start_date=date(2020, 8, 3)),
-        Employee(id=uuid.uuid4(), email="alex.tran@aria.dev",   full_name="Alex Tran",   department="Engineering", role="Data Analyst",       manager_id=manager.id, start_date=date(2024, 2, 19)),
-        Employee(id=uuid.uuid4(), email="rohan.patel@aria.dev", full_name="Rohan Patel", department="Engineering", role="Backend Engineer",   manager_id=manager.id, start_date=date(2021, 11, 1)),
+        Employee(id=uuid.uuid4(), email="sarah.chen@aria.dev", full_name="Sarah Chen",
+                 department=dept, role="Software Engineer", manager_id=manager.id,
+                 start_date=date(2022, 3, 14)),
+        Employee(id=uuid.uuid4(), email="james.kim@aria.dev", full_name="James Kim",
+                 department=dept, role="Product Designer", manager_id=manager.id,
+                 start_date=date(2023, 1, 9)),
+        Employee(id=uuid.uuid4(), email="maria.lopez@aria.dev", full_name="Maria Lopez",
+                 department=dept, role="Senior Engineer", manager_id=manager.id,
+                 start_date=date(2020, 8, 3)),
+        Employee(id=uuid.uuid4(), email="alex.tran@aria.dev", full_name="Alex Tran",
+                 department=dept, role="Data Analyst", manager_id=manager.id,
+                 start_date=date(2024, 2, 19)),
+        Employee(id=uuid.uuid4(), email="rohan.patel@aria.dev", full_name="Rohan Patel",
+                 department=dept, role="Backend Engineer", manager_id=manager.id,
+                 start_date=date(2021, 11, 1)),
     ]
     db.add_all(extra)
     db.flush()
@@ -231,9 +242,11 @@ def _seed_policies_if_missing(db: Session):
             effective_date=date(2026, 1, 1),
             content=(
                 "Employees are entitled to 20 days of paid annual leave per calendar year. "
-                "Leave must be requested at least 5 business days in advance and approved by the direct manager. "
+                "Leave must be requested at least 5 business days in advance and approved by "
+                "the direct manager. "
                 "Unused leave up to 5 days may be carried over to the following year. "
-                "Annual leave accrues monthly at 1.67 days per month from the employee's start date."
+                "Annual leave accrues monthly at 1.67 days per month from the employee's "
+                "start date."
             ),
         ),
         HRPolicy(
@@ -245,9 +258,11 @@ def _seed_policies_if_missing(db: Session):
             content=(
                 "Employees are entitled to 10 days of paid sick leave per calendar year. "
                 "Sick leave does not carry over and resets on January 1st each year. "
-                "For absences of 3 or more consecutive days, a medical certificate from a registered physician is required. "
+                "For absences of 3 or more consecutive days, a medical certificate from a "
+                "registered physician is required. "
                 "Sick leave may not be used as a substitute for annual leave. "
-                "Employees should notify their manager as early as possible on the first day of absence."
+                "Employees should notify their manager as early as possible on the first day "
+                "of absence."
             ),
         ),
         HRPolicy(
@@ -259,9 +274,10 @@ def _seed_policies_if_missing(db: Session):
             content=(
                 "Primary caregivers are entitled to 16 weeks of fully paid parental leave. "
                 "Secondary caregivers are entitled to 4 weeks of fully paid parental leave. "
-                "Parental leave must commence within 12 months of the child's birth or adoption date. "
-                "Employees must provide at least 8 weeks' notice before the intended leave start date. "
-                "Parental leave is available to all employees who have completed 12 months of continuous service."
+                "Parental leave must commence within 12 months of the child's birth or "
+                "adoption date. Employees must provide at least 8 weeks' notice before the "
+                "intended leave start date. Parental leave is available to all employees who "
+                "have completed 12 months of continuous service."
             ),
         ),
         HRPolicy(
@@ -271,11 +287,12 @@ def _seed_policies_if_missing(db: Session):
             version="v1.2",
             effective_date=date(2025, 11, 1),
             content=(
-                "Salaries are paid on the last business day of each calendar month via direct deposit. "
-                "All compensation is reviewed annually in Q4, with adjustments effective January 1st. "
-                "Overtime for non-exempt employees is compensated at 1.5x the regular hourly rate. "
-                "Bonuses are discretionary and subject to individual and company performance. "
-                "Payslips are available through the HR portal within 2 business days of the pay date."
+                "Salaries are paid on the last business day of each calendar month via direct "
+                "deposit. All compensation is reviewed annually in Q4, with adjustments "
+                "effective January 1st. Overtime for non-exempt employees is compensated at "
+                "1.5x the regular hourly rate. Bonuses are discretionary and subject to "
+                "individual and company performance. Payslips are available through the HR "
+                "portal within 2 business days of the pay date."
             ),
         ),
         HRPolicy(
@@ -285,11 +302,13 @@ def _seed_policies_if_missing(db: Session):
             version="v1.4",
             effective_date=date(2026, 2, 1),
             content=(
-                "All employees are expected to act with integrity, respect, and professionalism at all times. "
-                "Harassment, discrimination, or bullying of any kind will not be tolerated and may result in immediate termination. "
-                "Employees must disclose any conflicts of interest to their manager and HR in writing. "
-                "Confidential company information must not be shared externally without written authorisation. "
-                "Violations of this policy should be reported to HR or via the anonymous ethics hotline."
+                "All employees are expected to act with integrity, respect, and professionalism "
+                "at all times. Harassment, discrimination, or bullying of any kind will not be "
+                "tolerated and may result in immediate termination. Employees must disclose any "
+                "conflicts of interest to their manager and HR in writing. Confidential company "
+                "information must not be shared externally without written authorisation. "
+                "Violations of this policy should be reported to HR or via the anonymous ethics "
+                "hotline."
             ),
         ),
         HRPolicy(
@@ -300,10 +319,11 @@ def _seed_policies_if_missing(db: Session):
             effective_date=date(2025, 6, 1),
             content=(
                 "All new employees undergo a 90-day probationary period from their start date. "
-                "During probation, employees receive weekly check-ins with their manager and access to the onboarding buddy programme. "
-                "A formal performance review is conducted at the 30-day, 60-day, and 90-day marks. "
-                "Either party may terminate employment during probation with 1 week's written notice. "
-                "Upon successful completion of probation, employees are eligible for the full benefits package."
+                "During probation, employees receive weekly check-ins with their manager and "
+                "access to the onboarding buddy programme. A formal performance review is "
+                "conducted at the 30-day, 60-day, and 90-day marks. Either party may terminate "
+                "employment during probation with 1 week's written notice. Upon successful "
+                "completion of probation, employees are eligible for the full benefits package."
             ),
         ),
     ]

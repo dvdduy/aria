@@ -7,7 +7,6 @@ from app.agent.tools.responses import (
     invalid_request,
     not_authorized,
     not_found,
-    not_implemented,
     profile_not_linked,
 )
 from app.models.employee import Employee
@@ -22,6 +21,8 @@ from app.services.leave_service import (
     list_leave_requests_for_employee,
     list_team_leave_by_status,
     reject_leave_request,
+)
+from app.services.leave_service import (
     submit_leave_request as _do_submit_leave_request,
 )
 
@@ -145,7 +146,9 @@ def list_team_leave(db: Session, context: ToolContext, **kwargs) -> dict:
         "tool": "list_team_leave",
         "status_filter": status,
         "leave_requests": [
-            _serialize_leave_request(r, employees[r.employee_id].full_name if r.employee_id in employees else None)
+            _serialize_leave_request(
+                r, employees[r.employee_id].full_name if r.employee_id in employees else None
+            )
             for r in requests
         ],
     }

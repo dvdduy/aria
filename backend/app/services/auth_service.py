@@ -29,7 +29,9 @@ def register_user(db: Session, payload: RegisterRequest):
     db.add(user)
     db.commit()
     db.refresh(user)
-    token = create_access_token(str(user.id), is_admin=user.is_admin, email=user.email, name=_employee_name(db, user))
+    token = create_access_token(
+        str(user.id), is_admin=user.is_admin, email=user.email, name=_employee_name(db, user)
+    )
     return {"access_token": token, "token_type": "bearer"}
 
 
@@ -37,5 +39,7 @@ def login_user(db: Session, payload: LoginRequest):
     user = db.query(User).filter(User.email == payload.email).first()
     if not user or not verify_password(payload.password, user.hashed_password):
         return None
-    token = create_access_token(str(user.id), is_admin=user.is_admin, email=user.email, name=_employee_name(db, user))
+    token = create_access_token(
+        str(user.id), is_admin=user.is_admin, email=user.email, name=_employee_name(db, user)
+    )
     return {"access_token": token, "token_type": "bearer"}
