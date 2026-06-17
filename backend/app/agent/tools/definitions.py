@@ -17,17 +17,16 @@ TOOL_DEFINITIONS = [
     },
     {
         "name": "submit_leave_request",
-        "description": "Submit a new leave request on behalf of an employee.",
+        "description": "Submit a leave request for the currently logged-in employee.",
         "input_schema": {
             "type": "object",
             "properties": {
-                "employee_id": {"type": "string"},
                 "leave_type": {"type": "string", "enum": ["annual", "sick", "parental", "unpaid"]},
                 "start_date": {"type": "string", "description": "YYYY-MM-DD"},
                 "end_date": {"type": "string", "description": "YYYY-MM-DD"},
                 "reason": {"type": "string"},
             },
-            "required": ["employee_id", "leave_type", "start_date", "end_date"],
+            "required": ["leave_type", "start_date", "end_date"],
         },
     },
     {

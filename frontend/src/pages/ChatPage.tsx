@@ -5,7 +5,7 @@ import { useAgentChat, type Message } from '@/hooks/useAgentChat'
 
 
 const SUGGESTIONS = [
-  'Approve a leave request',
+  'I need to take annual leave next week',
   "What's the sick leave policy?",
   "Show my team's pending leave",
 ]
