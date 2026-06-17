@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
 from sqlalchemy.orm import Session
 
@@ -81,6 +81,47 @@ def list_pending_leave_requests_for_manager(
         .order_by(LeaveRequest.created_at.desc())
         .all()
     )
+
+
+def get_annual_leave_balance(db: Session, employee: Employee) -> dict:
+    year = date.today().year
+    start_of_year = date(year, 1, 1)
+    end_of_year = date(year, 12, 31)
+
+    approved = (
+        db.query(LeaveRequest)
+        .filter(
+            LeaveRequest.employee_id == employee.id,
+            LeaveRequest.leave_type == "annual",
+            LeaveRequest.status == "approved",
+            LeaveRequest.start_date >= start_of_year,
+            LeaveRequest.start_date <= end_of_year,
+        )
+        .all()
+    )
+    used_days = sum(r.days_requested for r in approved)
+    entitlement = 20
+    return {
+        "year": year,
+        "entitlement_days": entitlement,
+        "used_days": used_days,
+        "remaining_days": max(0, entitlement - used_days),
+    }
+
+
+def list_team_leave_by_status(
+    db: Session,
+    manager: Employee,
+    status: str | None = None,
+) -> list[LeaveRequest]:
+    direct_reports = list_direct_reports(db, manager)
+    direct_report_ids = [e.id for e in direct_reports]
+    if not direct_report_ids:
+        return []
+    q = db.query(LeaveRequest).filter(LeaveRequest.employee_id.in_(direct_report_ids))
+    if status and status != "all":
+        q = q.filter(LeaveRequest.status == status)
+    return q.order_by(LeaveRequest.start_date.asc()).all()
 
 
 def submit_leave_request(

@@ -167,6 +167,63 @@ function PolicyModal({ initial, onClose, onSaved }: PolicyModalProps) {
   )
 }
 
+// ── policy detail drawer ──────────────────────────────────────────────────────
+
+interface PolicyDrawerProps {
+  policy: HRPolicy
+  admin: boolean
+  onClose: () => void
+  onEdit: (p: HRPolicy) => void
+  onDelete: (id: string, title: string) => void
+}
+
+function PolicyDrawer({ policy, admin, onClose, onEdit, onDelete }: PolicyDrawerProps) {
+  return (
+    <>
+      <div className="pol-drawer-backdrop" onClick={onClose} />
+      <div className="pol-drawer" role="dialog" aria-modal="true">
+        <div className="pol-drawer-hdr">
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="pol-drawer-title">{policy.title}</div>
+            <div className="pol-drawer-meta">
+              {formatCategory(policy.category)} · {policy.version}
+              {policy.effective_date ? ` · Effective ${formatEffective(policy.effective_date)}` : ''}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+            {admin && (
+              <button
+                className="btn btn-secondary btn-xs"
+                type="button"
+                onClick={() => onEdit(policy)}
+              >
+                Edit
+              </button>
+            )}
+            {admin && (
+              <button
+                className="btn btn-danger btn-xs"
+                type="button"
+                onClick={() => onDelete(policy.id, policy.title)}
+              >
+                Delete
+              </button>
+            )}
+            <button className="btn-icon" onClick={onClose} type="button" aria-label="Close">
+              <svg fill="none" height="16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75" viewBox="0 0 24 24" width="16">
+                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div className="pol-drawer-body">
+          <p className="pol-drawer-content">{policy.content}</p>
+        </div>
+      </div>
+    </>
+  )
+}
+
 // ── main page ─────────────────────────────────────────────────────────────────
 
 const FILTER_PILLS = ['All', 'Leave', 'Payroll', 'Conduct', 'Onboarding']
@@ -179,7 +236,10 @@ export default function PoliciesPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // modal state
+  // drawer state
+  const [drawerPolicy, setDrawerPolicy] = useState<HRPolicy | null>(null)
+
+  // edit modal state
   const [modalOpen, setModalOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<HRPolicy | null>(null)
 
@@ -207,22 +267,28 @@ export default function PoliciesPage() {
     return matchesFilter && matchesSearch
   })
 
-  const openCreate = () => { setEditTarget(null); setModalOpen(true) }
-
-  const openEdit = async (id: string) => {
+  const openDrawer = async (id: string) => {
     try {
       const full = await policiesApi.getPolicy(id)
-      setEditTarget(full)
-      setModalOpen(true)
+      setDrawerPolicy(full)
     } catch {
-      setError('Could not load policy for editing.')
+      setError('Could not load policy.')
     }
+  }
+
+  const openCreate = () => { setEditTarget(null); setModalOpen(true) }
+
+  const openEdit = (policy: HRPolicy) => {
+    setDrawerPolicy(null)
+    setEditTarget(policy)
+    setModalOpen(true)
   }
 
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Delete "${title}"? This cannot be undone.`)) return
     try {
       await policiesApi.deletePolicy(id)
+      setDrawerPolicy(null)
       void load()
     } catch {
       setError('Failed to delete policy.')
@@ -281,8 +347,12 @@ export default function PoliciesPage() {
         ) : (
           <div className="list-card">
             {visible.map((p) => (
-              <div className="list-row" key={p.id}>
-                <div style={{ flex: 1 }}>
+              <div
+                className="list-row pol-row-clickable"
+                key={p.id}
+                onClick={() => void openDrawer(p.id)}
+              >
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="lname">{p.title}</div>
                   <div className="lmeta">
                     {formatCategory(p.category)} · {p.version}
@@ -290,12 +360,21 @@ export default function PoliciesPage() {
                   </div>
                 </div>
                 {admin ? (
-                  <div className="pol-actions-cell">
-                    <button className="btn btn-secondary btn-xs" type="button" onClick={() => void openEdit(p.id)}>Edit</button>
+                  <div className="pol-actions-cell" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      className="btn btn-secondary btn-xs"
+                      type="button"
+                      onClick={async () => {
+                        const full = await policiesApi.getPolicy(p.id)
+                        openEdit(full)
+                      }}
+                    >
+                      Edit
+                    </button>
                     <button className="btn btn-danger btn-xs" type="button" onClick={() => void handleDelete(p.id, p.title)}>Delete</button>
                   </div>
                 ) : (
-                  <span style={{ color: 'var(--color-text-tertiary)', fontSize: 14 }}>›</span>
+                  <span className="pol-chevron">›</span>
                 )}
               </div>
             ))}
@@ -304,6 +383,16 @@ export default function PoliciesPage() {
 
         <Link className="tb-btn" to="/chat">Ask HR Agent about a policy ↗</Link>
       </div>
+
+      {drawerPolicy && (
+        <PolicyDrawer
+          policy={drawerPolicy}
+          admin={admin}
+          onClose={() => setDrawerPolicy(null)}
+          onEdit={openEdit}
+          onDelete={handleDelete}
+        />
+      )}
 
       {modalOpen && (
         <PolicyModal

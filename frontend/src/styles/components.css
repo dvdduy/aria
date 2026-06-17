@@ -1840,6 +1840,70 @@
   white-space: nowrap;
 }
 
+.pol-row-clickable { cursor: pointer; }
+.pol-row-clickable:hover { background: var(--color-bg-secondary); }
+
+.pol-chevron {
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+/* Policy detail drawer */
+.pol-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+}
+
+.pol-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  height: 100vh;
+  background: var(--color-bg-primary);
+  border-left: 0.5px solid var(--color-border-default);
+  box-shadow: -4px 0 24px rgba(0,0,0,0.08);
+  z-index: 91;
+  display: flex;
+  flex-direction: column;
+}
+
+.pol-drawer-hdr {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 0.5px solid var(--color-border-subtle);
+  flex-shrink: 0;
+}
+
+.pol-drawer-title {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  line-height: 1.4;
+  margin-bottom: 3px;
+}
+
+.pol-drawer-meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.pol-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-5);
+}
+
+.pol-drawer-content {
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  color: var(--color-text-primary);
+  white-space: pre-wrap;
+}
+
 /* Markdown rendered inside agent bubbles */
 .md { display: flex; flex-direction: column; gap: 6px; }
 .md p  { margin: 0; }

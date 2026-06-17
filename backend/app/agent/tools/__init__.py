@@ -1,6 +1,7 @@
 from app.agent.tools.context import ToolContext
 from app.agent.tools.employee_tools import get_employee_info
 from app.agent.tools.leave_tools import (
+    get_leave_balance,
     get_leave_request,
     list_team_leave,
     submit_leave_request,
@@ -15,6 +16,7 @@ from app.core.logging import logger
 TOOL_MAP = {
     "get_employee_info": get_employee_info,
     "get_leave_request": get_leave_request,
+    "get_leave_balance": get_leave_balance,
     "submit_leave_request": submit_leave_request,
     "update_leave_status": update_leave_status,
     "list_team_leave": list_team_leave,

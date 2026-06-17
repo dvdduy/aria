@@ -43,11 +43,25 @@ TOOL_DEFINITIONS = [
         },
     },
     {
-        "name": "list_team_leave",
-        "description": "List pending leave requests for the current manager's direct reports.",
+        "name": "get_leave_balance",
+        "description": "Return the current user's annual leave balance for this calendar year — entitlement, days used, and days remaining.",
         "input_schema": {
             "type": "object",
             "properties": {},
+        },
+    },
+    {
+        "name": "list_team_leave",
+        "description": "List leave requests for the current manager's direct reports.",
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "string",
+                    "enum": ["pending", "approved", "rejected", "all"],
+                    "description": "Filter by status. Defaults to 'pending'. Use 'approved' to see who is currently on leave, 'all' for full history.",
+                },
+            },
         },
     },
     {

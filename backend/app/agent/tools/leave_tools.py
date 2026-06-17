@@ -18,8 +18,9 @@ from app.services.leave_service import (
     LeaveAuthorizationError,
     LeaveRequestNotFoundError,
     approve_leave_request,
+    get_annual_leave_balance,
     list_leave_requests_for_employee,
-    list_pending_leave_requests_for_manager,
+    list_team_leave_by_status,
     reject_leave_request,
     submit_leave_request as _do_submit_leave_request,
 )
@@ -117,11 +118,24 @@ def update_leave_status(db: Session, context: ToolContext, **kwargs) -> dict:
     }
 
 
+def get_leave_balance(db: Session, context: ToolContext, **kwargs) -> dict:
+    if not context.employee:
+        return profile_not_linked("get_leave_balance")
+
+    balance = get_annual_leave_balance(db, context.employee)
+    return {
+        "tool": "get_leave_balance",
+        "employee_name": context.employee.full_name,
+        "balance": balance,
+    }
+
+
 def list_team_leave(db: Session, context: ToolContext, **kwargs) -> dict:
     if not context.employee:
         return profile_not_linked("list_team_leave")
 
-    requests = list_pending_leave_requests_for_manager(db, context.employee)
+    status = kwargs.get("status", "pending")
+    requests = list_team_leave_by_status(db, context.employee, status=status)
     emp_ids = {r.employee_id for r in requests}
     employees = {
         e.id: e
@@ -129,6 +143,7 @@ def list_team_leave(db: Session, context: ToolContext, **kwargs) -> dict:
     }
     return {
         "tool": "list_team_leave",
+        "status_filter": status,
         "leave_requests": [
             _serialize_leave_request(r, employees[r.employee_id].full_name if r.employee_id in employees else None)
             for r in requests
