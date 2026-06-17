@@ -1,3 +1,6 @@
+import json
+import uuid
+
 from anthropic import Anthropic
 from sqlalchemy.orm import Session
 
@@ -46,7 +49,10 @@ class AgentRunner:
                 return {"message": final_text, "tool_trace": tool_trace}
 
             if response.stop_reason == "tool_use":
+                content_blocks = [self._block_to_dict(b) for b in response.content]
                 history.append({"role": "assistant", "content": response.content})
+                self._save_to_memory(session_id, user_id, "assistant", content_blocks, db)
+
                 tool_results = []
                 for block in response.content:
                     if block.type == "tool_use":
@@ -58,6 +64,7 @@ class AgentRunner:
                             "content": str(result),
                         })
                 history.append({"role": "user", "content": tool_results})
+                self._save_to_memory(session_id, user_id, "user", tool_results, db)
 
         return {
             "message": (
@@ -66,6 +73,13 @@ class AgentRunner:
             ),
             "tool_trace": tool_trace,
         }
+
+    def _block_to_dict(self, block) -> dict:
+        if block.type == "tool_use":
+            return {"type": "tool_use", "id": block.id, "name": block.name, "input": block.input}
+        if block.type == "text":
+            return {"type": "text", "text": block.text}
+        return {"type": block.type}
 
     def _load_history(self, session_id: str, user_id: str, db: Session) -> list:
         from app.models.agent_memory import AgentMemory
@@ -76,18 +90,27 @@ class AgentRunner:
             .limit(40)
             .all()
         )
-        return [{"role": r.role, "content": r.content} for r in records]
+        history = []
+        for r in records:
+            try:
+                content = json.loads(r.content)
+            except (json.JSONDecodeError, ValueError):
+                content = r.content
+            history.append({"role": r.role, "content": content})
+        return history
 
-    def _save_to_memory(self, session_id: str, user_id: str, role: str, content: str, db: Session):
-        import uuid
-
+    def _save_to_memory(self, session_id: str, user_id: str, role: str, content, db: Session):
         from app.models.agent_memory import AgentMemory
+        if isinstance(content, (list, dict)):
+            content_str = json.dumps(content)
+        else:
+            content_str = content
         db.add(
             AgentMemory(
                 user_id=user_id,
                 session_id=uuid.UUID(session_id) if isinstance(session_id, str) else session_id,
                 role=role,
-                content=content,
+                content=content_str,
             )
         )
         db.commit()

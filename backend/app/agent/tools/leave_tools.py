@@ -10,6 +10,7 @@ from app.agent.tools.responses import (
     not_implemented,
     profile_not_linked,
 )
+from app.models.employee import Employee
 from app.models.leave import LeaveRequest
 from app.schemas.leave import LeaveRequestCreate, LeaveRequestReject
 from app.services.leave_service import (
@@ -31,7 +32,7 @@ def get_leave_request(db: Session, context: ToolContext, **kwargs) -> dict:
     return {
         "tool": "get_leave_request",
         "leave_requests": [
-            _serialize_leave_request(request)
+            _serialize_leave_request(request, context.employee.full_name)
             for request in list_leave_requests_for_employee(db, context.employee)
         ],
     }
@@ -67,7 +68,7 @@ def submit_leave_request(db: Session, context: ToolContext, **kwargs) -> dict:
 
     return {
         "tool": "submit_leave_request",
-        "leave_request": _serialize_leave_request(request),
+        "leave_request": _serialize_leave_request(request, context.employee.full_name),
     }
 
 
@@ -108,9 +109,11 @@ def update_leave_status(db: Session, context: ToolContext, **kwargs) -> dict:
     except InvalidLeaveRequestError as exc:
         return invalid_request("update_leave_status", str(exc))
 
+    employee = db.query(Employee).filter(Employee.id == request.employee_id).first()
+    employee_name = employee.full_name if employee else None
     return {
         "tool": "update_leave_status",
-        "leave_request": _serialize_leave_request(request),
+        "leave_request": _serialize_leave_request(request, employee_name),
     }
 
 
@@ -118,19 +121,26 @@ def list_team_leave(db: Session, context: ToolContext, **kwargs) -> dict:
     if not context.employee:
         return profile_not_linked("list_team_leave")
 
+    requests = list_pending_leave_requests_for_manager(db, context.employee)
+    emp_ids = {r.employee_id for r in requests}
+    employees = {
+        e.id: e
+        for e in db.query(Employee).filter(Employee.id.in_(emp_ids)).all()
+    }
     return {
         "tool": "list_team_leave",
         "leave_requests": [
-            _serialize_leave_request(request)
-            for request in list_pending_leave_requests_for_manager(db, context.employee)
+            _serialize_leave_request(r, employees[r.employee_id].full_name if r.employee_id in employees else None)
+            for r in requests
         ],
     }
 
 
-def _serialize_leave_request(request: LeaveRequest) -> dict:
+def _serialize_leave_request(request: LeaveRequest, employee_name: str | None = None) -> dict:
     return {
         "id": str(request.id),
         "employee_id": str(request.employee_id),
+        "employee_name": employee_name,
         "leave_type": request.leave_type,
         "start_date": request.start_date.isoformat(),
         "end_date": request.end_date.isoformat(),
