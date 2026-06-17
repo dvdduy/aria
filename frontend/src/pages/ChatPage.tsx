@@ -1,18 +1,33 @@
 import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import type { ToolTraceStep } from '@/api/agent'
+import { employeesApi } from '@/api/employees'
 import { useAgentChat, type Message } from '@/hooks/useAgentChat'
 
-
-const SUGGESTIONS = [
-  'I need to take annual leave next week',
-  "What's the sick leave policy?",
-  "Show my team's pending leave",
+const EMPLOYEE_SUGGESTIONS = [
+  "How many annual leave days do I have left?",
+  "I need to take sick leave tomorrow",
+  "What's the parental leave policy?",
+  "When does my leave balance reset?",
 ]
 
-function decodeTokenClaims(token: string): { name?: string; email?: string } {
+const MANAGER_SUGGESTIONS = [
+  "Show my team's pending leave requests",
+  "Who's on leave this week?",
+  "What's the annual leave entitlement?",
+  "Approve a leave request for my team",
+]
+
+const ADMIN_SUGGESTIONS = [
+  "What HR policies are currently active?",
+  "Show all pending leave requests",
+  "How do I onboard a new employee?",
+  "What's the code of conduct policy?",
+]
+
+function decodeTokenClaims(token: string): { name?: string; email?: string; is_admin?: boolean } {
   try {
-    return JSON.parse(atob(token.split('.')[1])) as { name?: string; email?: string }
+    return JSON.parse(atob(token.split('.')[1])) as { name?: string; email?: string; is_admin?: boolean }
   } catch {
     return {}
   }
@@ -78,9 +93,24 @@ function ThinkingBubble() {
 export default function ChatPage() {
   const { messages, isThinking, send, reset } = useAgentChat()
   const [input, setInput] = useState('')
+  const [suggestions, setSuggestions] = useState(EMPLOYEE_SUGGESTIONS)
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const initials = getUserInitials()
+
+  useEffect(() => {
+    const token = sessionStorage.getItem('aria_token') ?? ''
+    const { is_admin } = decodeTokenClaims(token)
+    if (is_admin) {
+      setSuggestions(ADMIN_SUGGESTIONS)
+      return
+    }
+    employeesApi.getDirectReports()
+      .then((reports) => {
+        if (reports.length > 0) setSuggestions(MANAGER_SUGGESTIONS)
+      })
+      .catch(() => {})
+  }, [])
 
   const isEmpty = messages.length === 0 && !isThinking
   const hasResponse = messages.some((m) => m.role === 'assistant')
@@ -140,7 +170,7 @@ export default function ChatPage() {
             </div>
           </div>
           <div className="sugg-row" style={{ justifyContent: 'center', paddingBottom: '8px' }}>
-            {SUGGESTIONS.map((s) => (
+            {suggestions.map((s) => (
               <button className="sugg-btn" key={s} onClick={() => useSuggestion(s)} type="button">
                 {s}
               </button>
@@ -158,7 +188,7 @@ export default function ChatPage() {
           </div>
           {hasResponse && !isThinking && (
             <div className="sugg-row">
-              {SUGGESTIONS.map((s) => (
+              {suggestions.map((s) => (
                 <button className="sugg-btn" key={s} onClick={() => useSuggestion(s)} type="button">
                   {s}
                 </button>

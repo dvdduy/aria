@@ -61,8 +61,8 @@ export default function PayrollPage() {
 
   return (
     <div className="lp">
-      <div className="ph">
-        <span className="ptitle">Payroll</span>
+      <div className="page-topbar">
+        <span className="page-topbar-title">Payroll</span>
       </div>
 
       {isLoading && (

@@ -270,8 +270,8 @@ export function LeavePageView({
 
   return (
     <div className="lp">
-      <div className="ph">
-        <span className="ptitle">Leave management</span>
+      <div className="page-topbar">
+        <span className="page-topbar-title">Leave management</span>
         <button
           className="btn btn-primary btn-sm"
           onClick={() => setShowNewRequest(true)}
