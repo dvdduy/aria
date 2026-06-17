@@ -72,9 +72,9 @@ const NAV = [
   },
 ]
 
-function decodeTokenClaims(token: string): { name?: string; email?: string } {
+function decodeTokenClaims(token: string): { name?: string; email?: string; is_admin?: boolean } {
   try {
-    return JSON.parse(atob(token.split('.')[1])) as { name?: string; email?: string }
+    return JSON.parse(atob(token.split('.')[1])) as { name?: string; email?: string; is_admin?: boolean }
   } catch {
     return {}
   }
@@ -89,7 +89,7 @@ function getInitials(displayName: string): string {
 export default function AppLayout() {
   const navigate = useNavigate()
   const token = sessionStorage.getItem('aria_token') ?? ''
-  const { name, email } = decodeTokenClaims(token)
+  const { name, email, is_admin } = decodeTokenClaims(token)
   const displayName = name ?? email ?? ''
   const initials = displayName ? getInitials(displayName) : '?'
 
@@ -187,6 +187,23 @@ export default function AppLayout() {
               {label}
             </NavLink>
           ))}
+          {is_admin && (
+            <>
+              <div className="nav-label" style={{ marginTop: 8 }}>Admin</div>
+              <NavLink
+                className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}
+                to="/employees"
+              >
+                <svg fill="none" height="16" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75" viewBox="0 0 24 24" width="16">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <line x1="19" y1="8" x2="19" y2="14"/>
+                  <line x1="22" y1="11" x2="16" y2="11"/>
+                </svg>
+                Employees
+              </NavLink>
+            </>
+          )}
         </nav>
 
         <div className="sidebar-footer">

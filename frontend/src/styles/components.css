@@ -1717,6 +1717,36 @@
 .fp.active { background: var(--color-brand-600); color: #fff; border-color: var(--color-brand-600); }
 
 /* ════════════════════════════════════════════
+   EMPLOYEES PAGE
+════════════════════════════════════════════ */
+
+.emp-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  font-size: var(--text-xs);
+}
+
+.emp-count { color: var(--color-text-secondary); }
+.emp-count-sep { color: var(--color-text-tertiary); }
+.emp-count-dim { color: var(--color-text-tertiary); }
+
+.emp-row-inactive { opacity: 0.55; }
+
+.emp-badge-inactive {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-tertiary);
+  font-size: 10px;
+  font-weight: var(--weight-medium);
+  vertical-align: middle;
+}
+
+/* ════════════════════════════════════════════
    POLICY ADMIN MODAL
 ════════════════════════════════════════════ */
 
