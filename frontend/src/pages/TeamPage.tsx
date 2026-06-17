@@ -184,8 +184,12 @@ export default function TeamPage() {
 
             {/* member list */}
             {reports.length === 0 ? (
-              <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-tertiary)', padding: '8px 0' }}>
-                No direct reports.
+              <div className="empty-state">
+                <div className="empty-state-icon">
+                  <svg fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="20"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </div>
+                <div className="empty-state-title">No direct reports yet</div>
+                <div className="empty-state-body">Your team members will appear here once they're assigned to you.</div>
               </div>
             ) : (
               <div className="list-card" style={{ marginBottom: 'var(--space-4)' }}>

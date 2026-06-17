@@ -309,6 +309,14 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* all-clear message */}
+      {!isLoading && outToday.length === 0 && upcoming.length === 0 && teamPending.length === 0 && (
+        <div className="dash-all-clear">
+          <svg fill="none" height="14" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" width="14"><polyline points="20 6 9 17 4 12"/></svg>
+          All caught up — nothing needs your attention right now.
+        </div>
+      )}
+
       {/* who's out today */}
       {!isLoading && outToday.length > 0 && (
         <>

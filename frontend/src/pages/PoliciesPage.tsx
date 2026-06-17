@@ -353,8 +353,27 @@ export default function PoliciesPage() {
             Loading…
           </div>
         ) : visible.length === 0 ? (
-          <div style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)', padding: '12px 0' }}>
-            No policies found.
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <svg fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" x2="15" y1="13" y2="13"/><line x1="9" x2="15" y1="17" y2="17"/></svg>
+            </div>
+            {search.trim() ? (
+              <>
+                <div className="empty-state-title">No policies match "{search.trim()}"</div>
+                <div className="empty-state-body">Try a different search term or clear the filter.</div>
+                <button className="btn btn-secondary btn-sm" style={{ marginTop: 12 }} onClick={() => setSearch('')} type="button">Clear search</button>
+              </>
+            ) : activeFilter !== 'All' ? (
+              <>
+                <div className="empty-state-title">No {activeFilter.toLowerCase()} policies yet</div>
+                <div className="empty-state-body">Policies in this category will appear here once added.</div>
+              </>
+            ) : (
+              <>
+                <div className="empty-state-title">No policies yet</div>
+                <div className="empty-state-body">HR policies will appear here once they've been added.</div>
+              </>
+            )}
           </div>
         ) : (
           <div className="list-card">
