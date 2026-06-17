@@ -47,6 +47,13 @@ function getUserInitials(): string {
   return src.slice(0, 2).toUpperCase() || '?'
 }
 
+function getUserFirstName(): string {
+  const token = sessionStorage.getItem('aria_token') ?? ''
+  const { name, email } = decodeTokenClaims(token)
+  const src = name ?? email ?? ''
+  return src.split(/[\s._@]/)[0] || 'there'
+}
+
 // ── sub-components ────────────────────────────────────────────────────────────
 
 function ToolTrace({ steps }: { steps: ToolTraceStep[] }) {
@@ -97,6 +104,18 @@ function ThinkingBubble() {
   )
 }
 
+function GreetingBubble({ firstName }: { firstName: string }) {
+  return (
+    <div className="msg-row">
+      <div className="msg-av agent">HR</div>
+      <div className="bubble agent">
+        Hi {firstName}! I can help you approve leave requests, look up HR policies, check payroll,
+        and more. What would you like to do?
+      </div>
+    </div>
+  )
+}
+
 // ── page ─────────────────────────────────────────────────────────────────────
 
 export default function ChatPage() {
@@ -107,8 +126,9 @@ export default function ChatPage() {
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const initials = getUserInitials()
+  const firstName = getUserFirstName()
 
-  const isEmpty = messages.length === 0 && !isThinking && !isLoadingHistory
+  const showGreeting = messages.length === 0 && !isThinking && !isLoadingHistory
 
   // Role-aware suggestions
   useEffect(() => {
@@ -171,41 +191,22 @@ export default function ChatPage() {
         <span className="page-topbar-title">Chat</span>
       </div>
 
-      {isEmpty ? (
-        <>
-          <div className="empty-c">
-            <div className="empty-ico">🤖</div>
-            <div className="empty-t">What can I help with?</div>
-            <div className="empty-s">
-              Approve leave, look up a policy, check payroll, or manage your team — in plain English.
-            </div>
-          </div>
-          <div className="sugg-row" style={{ justifyContent: 'center', paddingBottom: '8px' }}>
-            {suggestions.map((s) => (
-              <button className="sugg-btn" key={s} onClick={() => useSuggestion(s)} type="button">
-                {s}
-              </button>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="chat-msgs">
-            {messages.map((msg, i) => (
-              <MessageBubble initials={initials} key={i} message={msg} />
-            ))}
-            {isThinking && <ThinkingBubble />}
-            <div ref={bottomRef} />
-          </div>
-          <div className="sugg-row">
-            {suggestions.map((s) => (
-              <button className="sugg-btn" key={s} onClick={() => useSuggestion(s)} type="button">
-                {s}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
+      <div className="chat-msgs">
+        {showGreeting && <GreetingBubble firstName={firstName} />}
+        {messages.map((msg, i) => (
+          <MessageBubble initials={initials} key={i} message={msg} />
+        ))}
+        {isThinking && <ThinkingBubble />}
+        <div ref={bottomRef} />
+      </div>
+
+      <div className="sugg-row">
+        {suggestions.map((s) => (
+          <button className="sugg-btn" key={s} onClick={() => useSuggestion(s)} type="button">
+            {s}
+          </button>
+        ))}
+      </div>
 
       <div className="chat-input-wrap">
         <div className="chat-box">

@@ -1506,41 +1506,6 @@
 .send-btn:hover:not(:disabled) { background: var(--color-brand-800); }
 .send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
 
-/* Empty state */
-.empty-c {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  padding: 28px 20px;
-  text-align: center;
-}
-
-.empty-ico {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  background: var(--color-brand-50);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 10px;
-  font-size: 20px;
-}
-
-.empty-t {
-  font-size: var(--text-base);
-  font-weight: var(--weight-medium);
-  margin-bottom: 4px;
-}
-
-.empty-s {
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-  max-width: 260px;
-  line-height: 1.55;
-}
 
 /* ════════════════════════════════════════════
    SHARED LIST PATTERN (Team, Policies, Dashboard)
