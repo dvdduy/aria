@@ -906,48 +906,6 @@
   margin-top: 2px;
 }
 
-.sec-title {
-  font-size: var(--text-sm);
-  font-weight: var(--weight-medium);
-  margin-bottom: var(--space-2);
-}
-
-.list-card {
-  border: 0.5px solid var(--color-border-subtle);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-  margin-bottom: var(--space-4);
-}
-
-.list-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border-bottom: 0.5px solid var(--color-border-subtle);
-  background: var(--color-bg-primary);
-}
-
-.list-row:last-child { border-bottom: none; }
-.list-row:hover { background: var(--color-bg-secondary); }
-
-.lname {
-  font-size: 12px;
-  font-weight: var(--weight-medium);
-}
-
-.lmeta {
-  font-size: 11px;
-  color: var(--color-text-secondary);
-}
-
-.ldates {
-  margin-left: auto;
-  font-size: 11px;
-  color: var(--color-text-secondary);
-  text-align: right;
-}
-
 .qa-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -969,6 +927,8 @@
   background: var(--color-bg-secondary);
   text-decoration: none;
 }
+
+.qa-ico { font-size: 18px; margin-bottom: 5px; }
 
 .qa-t {
   font-size: 12px;
@@ -1427,6 +1387,7 @@
 
 .lname { font-size: 12px; font-weight: var(--weight-medium); color: var(--color-text-primary); }
 .lmeta { font-size: 11px; color: var(--color-text-secondary); }
+.ldates { margin-left: auto; font-size: 11px; color: var(--color-text-secondary); text-align: right; }
 
 /* Pending badge (amber) — team leave status, dashboard */
 .badge-pend {

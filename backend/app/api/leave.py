@@ -13,6 +13,7 @@ from app.services.leave_service import (
     LeaveRequestNotFoundError,
     approve_leave_request,
     get_leave_request_for_employee,
+    list_all_leave_requests_for_manager,
     list_leave_requests_for_employee,
     list_pending_leave_requests_for_manager,
     reject_leave_request,
@@ -89,6 +90,31 @@ def get_team_pending_leave_requests(
             detail="Employee profile not linked",
         )
     requests = list_pending_leave_requests_for_manager(db, manager)
+    employee_ids = {r.employee_id for r in requests}
+    employees: dict = {}
+    if employee_ids:
+        employees = {
+            e.id: e
+            for e in db.query(Employee).filter(Employee.id.in_(employee_ids)).all()
+        }
+    return [
+        _serialize_leave_request(
+            r,
+            employee_name=employees[r.employee_id].full_name if r.employee_id in employees else None,
+        )
+        for r in requests
+    ]
+
+
+@router.get("/team/all", response_model=list[LeaveRequestResponse])
+def get_all_team_leave_requests(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    manager = get_employee_for_user(db, current_user)
+    if not manager:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee profile not linked")
+    requests = list_all_leave_requests_for_manager(db, manager)
     employee_ids = {r.employee_id for r in requests}
     employees: dict = {}
     if employee_ids:

@@ -23,6 +23,11 @@ export const leaveApi = {
     return data
   },
 
+  async getAllTeamLeaveRequests() {
+    const { data } = await client.get<LeaveRequest[]>('/api/leave/team/all')
+    return data
+  },
+
   async approveLeaveRequest(requestId: string) {
     const { data } = await client.post<LeaveRequest>(
       `/api/leave/${requestId}/approve`,

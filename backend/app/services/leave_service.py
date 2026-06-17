@@ -48,6 +48,22 @@ def get_leave_request_for_employee(
     raise LeaveAuthorizationError("Not authorized to access this leave request")
 
 
+def list_all_leave_requests_for_manager(
+    db: Session,
+    manager: Employee,
+) -> list[LeaveRequest]:
+    direct_reports = list_direct_reports(db, manager)
+    direct_report_ids = [employee.id for employee in direct_reports]
+    if not direct_report_ids:
+        return []
+    return (
+        db.query(LeaveRequest)
+        .filter(LeaveRequest.employee_id.in_(direct_report_ids))
+        .order_by(LeaveRequest.created_at.desc())
+        .all()
+    )
+
+
 def list_pending_leave_requests_for_manager(
     db: Session,
     manager: Employee,
