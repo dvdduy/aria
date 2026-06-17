@@ -1,7 +1,9 @@
 import json
+import uuid
 
 from app.api import agent as agent_api
 from app.core.security import create_access_token, hash_password
+from app.models.agent_memory import AgentMemory
 from app.models.user import User
 from app.tasks.agent_task import FRIENDLY_AGENT_FAILURE_MESSAGE
 
@@ -341,6 +343,96 @@ def test_job_result_returns_404_when_owner_key_missing(client, db, monkeypatch):
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Job not found"
+
+
+def test_list_sessions_returns_sessions_for_current_user(client, db):
+    user = _create_user(db, "owner@example.com")
+    other = _create_user(db, "other@example.com")
+    sid = uuid.uuid4()
+    other_sid = uuid.uuid4()
+
+    db.add_all([
+        AgentMemory(user_id=user.id, session_id=sid, role="user", content="What is my leave balance?"),
+        AgentMemory(user_id=user.id, session_id=sid, role="assistant", content="You have 15 days left."),
+        AgentMemory(user_id=other.id, session_id=other_sid, role="user", content="Other user message"),
+    ])
+    db.commit()
+
+    response = client.get("/api/agent/sessions", headers=_auth_headers(user))
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1
+    assert body[0]["session_id"] == str(sid)
+    assert body[0]["preview"] == "What is my leave balance?"
+
+
+def test_list_sessions_excludes_sessions_with_no_text_user_message(client, db):
+    user = _create_user(db, "owner@example.com")
+    sid = uuid.uuid4()
+
+    db.add(AgentMemory(
+        user_id=user.id, session_id=sid, role="user",
+        content=json.dumps([{"type": "tool_result"}]),
+    ))
+    db.commit()
+
+    response = client.get("/api/agent/sessions", headers=_auth_headers(user))
+
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_list_sessions_requires_authentication(client):
+    response = client.get("/api/agent/sessions")
+
+    assert response.status_code == 403
+
+
+def test_get_chat_history_returns_text_messages_for_session(client, db):
+    user = _create_user(db, "owner@example.com")
+    sid = uuid.uuid4()
+
+    db.add_all([
+        AgentMemory(user_id=user.id, session_id=sid, role="user", content="Hello"),
+        AgentMemory(user_id=user.id, session_id=sid, role="assistant", content="Hi there!"),
+        AgentMemory(user_id=user.id, session_id=sid, role="user",
+                    content=json.dumps([{"type": "tool_result"}])),
+    ])
+    db.commit()
+
+    response = client.get(f"/api/agent/history/{sid}", headers=_auth_headers(user))
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 2
+    assert body[0] == {"role": "user", "content": "Hello"}
+    assert body[1] == {"role": "assistant", "content": "Hi there!"}
+
+
+def test_get_chat_history_excludes_other_users_messages(client, db):
+    user = _create_user(db, "owner@example.com")
+    other = _create_user(db, "other@example.com")
+    sid = uuid.uuid4()
+
+    db.add_all([
+        AgentMemory(user_id=user.id, session_id=sid, role="user", content="My message"),
+        AgentMemory(user_id=other.id, session_id=sid, role="user", content="Other message"),
+    ])
+    db.commit()
+
+    response = client.get(f"/api/agent/history/{sid}", headers=_auth_headers(user))
+
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1
+    assert body[0]["content"] == "My message"
+
+
+def test_get_chat_history_requires_authentication(client):
+    response = client.get(f"/api/agent/history/{uuid.uuid4()}")
+
+    assert response.status_code == 403
 
 
 def _create_user(db, email: str) -> User:
