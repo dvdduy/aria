@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 
 const NAV = [
   {
@@ -84,10 +84,16 @@ function getInitials(displayName: string): string {
 }
 
 export default function AppLayout() {
+  const navigate = useNavigate()
   const token = sessionStorage.getItem('aria_token') ?? ''
   const { name, email } = decodeTokenClaims(token)
   const displayName = name ?? email ?? ''
   const initials = displayName ? getInitials(displayName) : '?'
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('aria_token')
+    navigate('/login')
+  }
 
   return (
     <div className="app-shell">
@@ -117,9 +123,16 @@ export default function AppLayout() {
         <div className="sidebar-footer">
           <div className="user-row">
             <div className="avatar avatar-sm">{initials}</div>
-            <div>
+            <div className="user-info">
               <div className="user-name">{displayName || 'Unknown'}</div>
             </div>
+            <button className="btn-icon logout-btn" onClick={handleLogout} title="Sign out" type="button">
+              <svg fill="none" height="15" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.75" viewBox="0 0 24 24" width="15">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" x2="9" y1="12" y2="12"/>
+              </svg>
+            </button>
           </div>
         </div>
       </aside>
