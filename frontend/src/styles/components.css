@@ -1024,6 +1024,51 @@
   color: var(--color-text-secondary);
 }
 
+/* out-today chips */
+.dash-out-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--space-4);
+}
+
+.dash-out-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-bg-secondary);
+  border: 0.5px solid var(--color-border-subtle);
+  border-radius: var(--radius-full);
+  padding: 3px 10px 3px 3px;
+  font-size: var(--text-xs);
+  color: var(--color-text-primary);
+}
+
+.dash-out-av {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  font-weight: var(--weight-medium);
+  flex-shrink: 0;
+}
+
+/* upcoming leave type pill */
+.dash-type-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-weight: var(--weight-medium);
+  text-transform: capitalize;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 
 /* ════════════════════════════════════════════
    LEAVE REQUEST FORM
