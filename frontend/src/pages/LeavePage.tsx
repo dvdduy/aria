@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { leaveApi, type SubmitLeaveRequestPayload } from '@/api/leave'
 import type { LeaveRequest, LeaveStatus, LeaveType } from '@/types/models'
 import { formatDateRange, formatLeaveType } from '@/utils/leaveFormatting'
@@ -30,6 +30,12 @@ function Modal({ children, onClose, title }: {
   onClose: () => void
   children: React.ReactNode
 }) {
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
   return (
     <div aria-modal="true" className="modal-overlay" onClick={onClose} role="dialog">
       <div className="modal-box" onClick={(e) => e.stopPropagation()}>
@@ -174,6 +180,49 @@ function RejectModal({ isActing, onClose, onReject }: {
   )
 }
 
+function CancelModal({ isActing, onClose, onConfirm, request }: {
+  isActing: boolean
+  onClose: () => void
+  onConfirm: () => void
+  request: LeaveRequest
+}) {
+  const keepRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => { keepRef.current?.focus() }, [])
+
+  const typeLabel = request.leave_type.charAt(0).toUpperCase() + request.leave_type.slice(1)
+  return (
+    <Modal onClose={onClose} title="Cancel leave request">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', paddingTop: '2px' }}>
+        <div style={{
+          background: 'var(--color-bg-secondary)',
+          border: '0.5px solid var(--color-border-subtle)',
+          borderRadius: 'var(--radius-md)',
+          padding: '8px 12px',
+          fontSize: 'var(--text-sm)',
+        }}>
+          {typeLabel} leave · {formatDateRange(request.start_date, request.end_date)} · {request.days_requested} day{request.days_requested !== 1 ? 's' : ''}
+        </div>
+        <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
+          Cancel this request? Your manager will be notified.
+        </p>
+        <div className="leave-form-footer">
+          <button ref={keepRef} className="btn btn-secondary btn-sm" onClick={onClose} type="button">
+            Keep it
+          </button>
+          <button
+            className="btn btn-danger btn-sm"
+            disabled={isActing}
+            onClick={onConfirm}
+            type="button"
+          >
+            {isActing ? 'Cancelling…' : 'Yes, cancel'}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
 export interface LeavePageViewProps {
   myRequests: LeaveRequest[]
   teamRequests: LeaveRequest[]
@@ -183,6 +232,7 @@ export interface LeavePageViewProps {
   isSubmitting: boolean
   submitError: string | null
   onApprove: (requestId: string) => void
+  onCancel: (requestId: string) => void
   onReject: (requestId: string, reason: string) => void
   onSubmitLeave: (payload: SubmitLeaveRequestPayload) => Promise<void>
   onRetry: () => void
@@ -195,6 +245,7 @@ export function LeavePageView({
   isSubmitting,
   myRequests,
   onApprove,
+  onCancel,
   onReject,
   onRetry,
   onSubmitLeave,
@@ -204,6 +255,7 @@ export function LeavePageView({
   const [activeFilter, setActiveFilter] = useState<Filter>('all')
   const [showNewRequest, setShowNewRequest] = useState(false)
   const [rejectingRequest, setRejectingRequest] = useState<LeaveRequest | null>(null)
+  const [cancellingRequest, setCancellingRequest] = useState<LeaveRequest | null>(null)
 
   const combined: TaggedRequest[] = useMemo(() => [
     ...myRequests.map((r) => ({ ...r, isOwn: true })),
@@ -265,6 +317,7 @@ export function LeavePageView({
           ) : (
             filtered.map((request) => {
               const canAct = !request.isOwn && request.status === 'pending'
+              const canCancel = request.isOwn && request.status === 'pending'
               const isActing = actingRequestId === request.id
               return (
                 <div className="lt-row" key={request.id}>
@@ -298,6 +351,16 @@ export function LeavePageView({
                         </button>
                       </>
                     )}
+                    {canCancel && (
+                      <button
+                        className="act-b act-b-danger"
+                        disabled={isActing}
+                        onClick={() => setCancellingRequest(request)}
+                        type="button"
+                      >
+                        {isActing ? '...' : 'Cancel'}
+                      </button>
+                    )}
                   </div>
                 </div>
               )
@@ -328,6 +391,18 @@ export function LeavePageView({
             onReject(rejectingRequest.id, reason)
             setRejectingRequest(null)
           }}
+        />
+      )}
+
+      {cancellingRequest && (
+        <CancelModal
+          isActing={actingRequestId === cancellingRequest.id}
+          onClose={() => setCancellingRequest(null)}
+          onConfirm={() => {
+            onCancel(cancellingRequest.id)
+            setCancellingRequest(null)
+          }}
+          request={cancellingRequest}
         />
       )}
     </div>
@@ -375,6 +450,19 @@ export default function LeavePage() {
     }
   }
 
+  const handleCancel = async (requestId: string) => {
+    setActingRequestId(requestId)
+    setError(null)
+    try {
+      await leaveApi.cancelLeaveRequest(requestId)
+      await loadData()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to cancel request')
+    } finally {
+      setActingRequestId(null)
+    }
+  }
+
   const handleReject = async (requestId: string, reason: string) => {
     setActingRequestId(requestId)
     setError(null)
@@ -411,6 +499,7 @@ export default function LeavePage() {
       isSubmitting={isSubmitting}
       myRequests={myRequests}
       onApprove={(requestId) => void handleApprove(requestId)}
+      onCancel={(requestId) => void handleCancel(requestId)}
       onReject={(requestId, reason) => void handleReject(requestId, reason)}
       onRetry={() => void loadData()}
       onSubmitLeave={handleSubmitLeave}

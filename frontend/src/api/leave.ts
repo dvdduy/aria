@@ -50,4 +50,9 @@ export const leaveApi = {
     const { data } = await client.post<LeaveRequest>('/api/leave/mine', payload)
     return data
   },
+
+  async cancelLeaveRequest(requestId: string) {
+    const { data } = await client.post<LeaveRequest>(`/api/leave/${requestId}/cancel`)
+    return data
+  },
 }

@@ -37,6 +37,7 @@ const renderView = (overrides: Partial<Parameters<typeof LeavePageView>[0]>) =>
       isSubmitting={false}
       myRequests={[myRequest]}
       onApprove={vi.fn()}
+      onCancel={vi.fn()}
       onReject={vi.fn()}
       onRetry={vi.fn()}
       onSubmitLeave={vi.fn()}

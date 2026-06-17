@@ -12,6 +12,7 @@ from app.services.leave_service import (
     LeaveAuthorizationError,
     LeaveRequestNotFoundError,
     approve_leave_request,
+    cancel_leave_request,
     get_leave_request_for_employee,
     list_all_leave_requests_for_manager,
     list_leave_requests_for_employee,
@@ -193,6 +194,26 @@ def reject_team_leave_request(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         ) from exc
+    return _serialize_leave_request(request)
+
+
+@router.post("/{request_id}/cancel", response_model=LeaveRequestResponse)
+def cancel_my_leave_request(
+    request_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    employee = get_employee_for_user(db, current_user)
+    if not employee:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Employee profile not linked")
+    try:
+        request = cancel_leave_request(db, employee, request_id)
+    except LeaveRequestNotFoundError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    except LeaveAuthorizationError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=str(exc)) from exc
+    except InvalidLeaveRequestError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
     return _serialize_leave_request(request)
 
 

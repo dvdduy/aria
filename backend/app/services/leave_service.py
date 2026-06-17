@@ -124,6 +124,27 @@ def list_team_leave_by_status(
     return q.order_by(LeaveRequest.start_date.asc()).all()
 
 
+def cancel_leave_request(
+    db: Session,
+    employee: Employee,
+    request_id,
+) -> LeaveRequest:
+    request = db.query(LeaveRequest).filter(LeaveRequest.id == request_id).first()
+    if not request:
+        raise LeaveRequestNotFoundError("Leave request not found")
+
+    if request.employee_id != employee.id:
+        raise LeaveAuthorizationError("Not authorized to cancel this leave request")
+
+    if request.status != "pending":
+        raise InvalidLeaveRequestError("Only pending requests can be cancelled")
+
+    request.status = "cancelled"
+    db.commit()
+    db.refresh(request)
+    return request
+
+
 def submit_leave_request(
     db: Session,
     employee: Employee,

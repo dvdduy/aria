@@ -35,6 +35,7 @@
   border-color: var(--color-brand-600);
 }
 .btn-primary:hover:not(:disabled) { background: var(--color-brand-800); border-color: var(--color-brand-800); }
+.btn-primary:focus { background: var(--color-brand-800); border-color: var(--color-brand-800); box-shadow: 0 0 0 3px var(--color-brand-200); outline: none; }
 
 /* Outlined — for secondary actions (Cancel, View) */
 .btn-secondary {
@@ -43,6 +44,7 @@
   border-color: var(--color-border-default);
 }
 .btn-secondary:hover:not(:disabled) { background: var(--color-bg-secondary); }
+.btn-secondary:focus { background: var(--color-bg-secondary); border-color: var(--color-border-strong); box-shadow: 0 0 0 3px var(--color-border-subtle); outline: none; }
 
 /* Ghost — for tertiary / "ask agent" links */
 .btn-ghost {
@@ -51,6 +53,7 @@
   border-color: transparent;
 }
 .btn-ghost:hover:not(:disabled) { background: var(--color-brand-50); }
+.btn-ghost:focus { background: var(--color-brand-50); box-shadow: 0 0 0 3px var(--color-brand-100); outline: none; }
 
 /* Danger outlined — for destructive actions (Reject, Delete) */
 .btn-danger {
@@ -59,7 +62,9 @@
   border-color: var(--color-danger-200);
 }
 .btn-danger:hover:not(:disabled) { background: var(--color-danger-50); }
+.btn-danger:focus { background: var(--color-danger-50); border-color: var(--color-danger-400); box-shadow: 0 0 0 3px var(--color-danger-100); outline: none; }
 
+/* Icon-only focus */
 /* Size variants */
 .btn-xs { padding: 2px 8px; font-size: 11px; border-radius: var(--radius-sm); }
 .btn-sm { padding: 4px 10px; font-size: var(--text-xs); border-radius: var(--radius-sm); }
@@ -74,6 +79,7 @@
   color: var(--color-text-secondary);
 }
 .btn-icon:hover { background: var(--color-bg-secondary); color: var(--color-text-primary); }
+.btn-icon:focus { background: var(--color-bg-secondary); color: var(--color-text-primary); box-shadow: 0 0 0 3px var(--color-border-subtle); outline: none; }
 
 
 /* ════════════════════════════════════════════
@@ -1184,6 +1190,8 @@
 
 .act-b:hover { background: var(--color-bg-secondary); }
 .act-b:disabled { opacity: 0.45; cursor: not-allowed; }
+.act-b-danger { color: var(--color-danger-600); border-color: var(--color-danger-200); }
+.act-b-danger:hover { background: var(--color-danger-50); }
 
 .lt-empty {
   padding: var(--space-8) var(--space-4);
