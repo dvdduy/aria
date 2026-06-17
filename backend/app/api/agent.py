@@ -46,6 +46,52 @@ def job_result(job_id: str, current_user: User = Depends(get_current_user)):
     }
 
 
+@router.get("/sessions")
+def list_sessions(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    records = (
+        db.query(AgentMemory)
+        .filter(AgentMemory.user_id == current_user.id)
+        .order_by(AgentMemory.session_id, AgentMemory.created_at)
+        .all()
+    )
+
+    by_session: dict[str, list] = {}
+    for r in records:
+        sid = str(r.session_id)
+        by_session.setdefault(sid, []).append(r)
+
+    sessions = []
+    for sid, rows in by_session.items():
+        preview = None
+        last_at = rows[0].created_at
+        for r in rows:
+            last_at = r.created_at
+            if r.role == "user" and preview is None:
+                try:
+                    parsed = json.loads(r.content)
+                    if isinstance(parsed, (list, dict)):
+                        continue
+                    text = str(parsed).strip()
+                except (json.JSONDecodeError, ValueError):
+                    text = r.content.strip()
+                if text:
+                    preview = text[:100]
+
+        if preview:
+            sessions.append({
+                "session_id": sid,
+                "preview": preview,
+                "started_at": rows[0].created_at.isoformat(),
+                "last_message_at": last_at.isoformat(),
+            })
+
+    sessions.sort(key=lambda s: s["last_message_at"], reverse=True)
+    return sessions
+
+
 @router.get("/history/{session_id}")
 def get_chat_history(
     session_id: str,

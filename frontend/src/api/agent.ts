@@ -19,6 +19,13 @@ export interface HistoryMessage {
   content: string
 }
 
+export interface ChatSession {
+  session_id: string
+  preview: string
+  started_at: string
+  last_message_at: string
+}
+
 export const agentApi = {
   chat: (message: string, session_id?: string) =>
     client.post<ChatEnqueueResponse>('/api/agent/chat', { message, session_id }),
@@ -31,4 +38,7 @@ export const agentApi = {
 
   history: (session_id: string) =>
     client.get<HistoryMessage[]>(`/api/agent/history/${session_id}`),
+
+  sessions: () =>
+    client.get<ChatSession[]>('/api/agent/sessions'),
 }

@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
+import { useSearchParams } from 'react-router-dom'
 import type { ToolTraceStep } from '@/api/agent'
 import { employeesApi } from '@/api/employees'
 import { useAgentChat, type Message } from '@/hooks/useAgentChat'
+
+// ── suggestions ───────────────────────────────────────────────────────────────
 
 const EMPLOYEE_SUGGESTIONS = [
   "How many annual leave days do I have left?",
@@ -25,6 +28,8 @@ const ADMIN_SUGGESTIONS = [
   "What's the code of conduct policy?",
 ]
 
+// ── helpers ───────────────────────────────────────────────────────────────────
+
 function decodeTokenClaims(token: string): { name?: string; email?: string; is_admin?: boolean } {
   try {
     return JSON.parse(atob(token.split('.')[1])) as { name?: string; email?: string; is_admin?: boolean }
@@ -41,6 +46,8 @@ function getUserInitials(): string {
   if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
   return src.slice(0, 2).toUpperCase() || '?'
 }
+
+// ── sub-components ────────────────────────────────────────────────────────────
 
 function ToolTrace({ steps }: { steps: ToolTraceStep[] }) {
   return (
@@ -90,30 +97,41 @@ function ThinkingBubble() {
   )
 }
 
+// ── page ─────────────────────────────────────────────────────────────────────
+
 export default function ChatPage() {
-  const { messages, isThinking, isLoadingHistory, send, reset } = useAgentChat()
+  const { messages, isThinking, isLoadingHistory, send, loadSession, reset } = useAgentChat()
   const [input, setInput] = useState('')
   const [suggestions, setSuggestions] = useState(EMPLOYEE_SUGGESTIONS)
+  const [searchParams, setSearchParams] = useSearchParams()
   const bottomRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const initials = getUserInitials()
 
+  const isEmpty = messages.length === 0 && !isThinking && !isLoadingHistory
+
+  // Role-aware suggestions
   useEffect(() => {
     const token = sessionStorage.getItem('aria_token') ?? ''
     const { is_admin } = decodeTokenClaims(token)
-    if (is_admin) {
-      setSuggestions(ADMIN_SUGGESTIONS)
-      return
-    }
+    if (is_admin) { setSuggestions(ADMIN_SUGGESTIONS); return }
     employeesApi.getDirectReports()
-      .then((reports) => {
-        if (reports.length > 0) setSuggestions(MANAGER_SUGGESTIONS)
-      })
+      .then((reports) => { if (reports.length > 0) setSuggestions(MANAGER_SUGGESTIONS) })
       .catch(() => {})
   }, [])
 
-  const isEmpty = messages.length === 0 && !isThinking && !isLoadingHistory
-  const hasResponse = messages.some((m) => m.role === 'assistant')
+  // Handle ?session= and ?new=1 URL params from sidebar clicks
+  useEffect(() => {
+    const sessionParam = searchParams.get('session')
+    const newParam = searchParams.get('new')
+    if (sessionParam) {
+      setSearchParams({}, { replace: true })
+      void loadSession(sessionParam)
+    } else if (newParam === '1') {
+      setSearchParams({}, { replace: true })
+      reset()
+    }
+  }, [searchParams, setSearchParams, loadSession, reset])
 
   // Scroll to bottom on new content
   useEffect(() => {
@@ -124,9 +142,7 @@ export default function ChatPage() {
     const text = input.trim()
     if (!text || isThinking) return
     setInput('')
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
-    }
+    if (textareaRef.current) textareaRef.current.style.height = 'auto'
     void send(text)
   }
 
@@ -151,13 +167,8 @@ export default function ChatPage() {
 
   return (
     <div className="chat-page">
-      <div className="ph">
-        <span className="ptitle">Chat</span>
-        {!isEmpty && (
-          <button className="btn btn-secondary btn-sm" onClick={reset} type="button">
-            New conversation
-          </button>
-        )}
+      <div className="page-topbar">
+        <span className="page-topbar-title">Chat</span>
       </div>
 
       {isEmpty ? (
@@ -186,15 +197,13 @@ export default function ChatPage() {
             {isThinking && <ThinkingBubble />}
             <div ref={bottomRef} />
           </div>
-          {hasResponse && !isThinking && (
-            <div className="sugg-row">
-              {suggestions.map((s) => (
-                <button className="sugg-btn" key={s} onClick={() => useSuggestion(s)} type="button">
-                  {s}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="sugg-row">
+            {suggestions.map((s) => (
+              <button className="sugg-btn" key={s} onClick={() => useSuggestion(s)} type="button">
+                {s}
+              </button>
+            ))}
+          </div>
         </>
       )}
 

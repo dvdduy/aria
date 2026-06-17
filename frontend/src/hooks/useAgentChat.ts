@@ -14,10 +14,20 @@ export function useAgentChat() {
   const [messages, setMessages] = useState<Message[]>([])
   const [isThinking, setIsThinking] = useState(false)
   const [isLoadingHistory, setIsLoadingHistory] = useState(false)
+  const [sessionId, setSessionIdState] = useState<string | undefined>(
+    sessionStorage.getItem(SESSION_KEY) ?? undefined,
+  )
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const sessionIdRef = useRef<string | undefined>(
     sessionStorage.getItem(SESSION_KEY) ?? undefined,
   )
+
+  const setSession = useCallback((id: string | undefined) => {
+    sessionIdRef.current = id
+    setSessionIdState(id)
+    if (id) sessionStorage.setItem(SESSION_KEY, id)
+    else sessionStorage.removeItem(SESSION_KEY)
+  }, [])
 
   // Restore history on mount if a session exists
   useEffect(() => {
@@ -31,12 +41,26 @@ export function useAgentChat() {
         }
       })
       .catch(() => {
-        // Session may have expired — clear it and start fresh
-        sessionStorage.removeItem(SESSION_KEY)
-        sessionIdRef.current = undefined
+        setSession(undefined)
       })
       .finally(() => setIsLoadingHistory(false))
-  }, [])
+  }, [setSession])
+
+  const loadSession = useCallback(async (sid: string) => {
+    if (pollRef.current) clearInterval(pollRef.current)
+    setIsThinking(false)
+    setIsLoadingHistory(true)
+    setMessages([])
+    try {
+      const { data } = await agentApi.history(sid)
+      setMessages(data.map((m) => ({ role: m.role, content: m.content, status: 'done' as const })))
+      setSession(sid)
+    } catch {
+      // session expired or not found
+    } finally {
+      setIsLoadingHistory(false)
+    }
+  }, [setSession])
 
   const send = useCallback(async (text: string) => {
     setMessages((prev) => [...prev, { role: 'user', content: text }])
@@ -45,8 +69,7 @@ export function useAgentChat() {
     try {
       const { data } = await agentApi.chat(text, sessionIdRef.current)
       const { job_id, session_id } = data
-      sessionIdRef.current = session_id
-      sessionStorage.setItem(SESSION_KEY, session_id)
+      setSession(session_id)
 
       pollRef.current = setInterval(async () => {
         const { data: statusData } = await agentApi.status(job_id)
@@ -83,15 +106,14 @@ export function useAgentChat() {
         { role: 'assistant', content: 'Failed to send message.', status: 'error' },
       ])
     }
-  }, [])
+  }, [setSession])
 
   const reset = useCallback(() => {
     if (pollRef.current) clearInterval(pollRef.current)
-    sessionIdRef.current = undefined
-    sessionStorage.removeItem(SESSION_KEY)
+    setSession(undefined)
     setMessages([])
     setIsThinking(false)
-  }, [])
+  }, [setSession])
 
-  return { messages, isThinking, isLoadingHistory, send, reset }
+  return { messages, isThinking, isLoadingHistory, sessionId, send, loadSession, reset }
 }

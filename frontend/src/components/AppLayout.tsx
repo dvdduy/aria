@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { agentApi, type ChatSession } from '@/api/agent'
 import { notificationsApi } from '@/api/notifications'
 import type { Notification } from '@/types/models'
 
@@ -112,6 +113,7 @@ function timeAgo(isoStr: string): string {
 
 export default function AppLayout() {
   const navigate = useNavigate()
+  const location = useLocation()
   const token = sessionStorage.getItem('aria_token') ?? ''
   const { name, email, is_admin } = decodeTokenClaims(token)
   const displayName = name ?? email ?? ''
@@ -121,6 +123,10 @@ export default function AppLayout() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [bellOpen, setBellOpen] = useState(false)
   const bellRef = useRef<HTMLDivElement>(null)
+  const [sessions, setSessions] = useState<ChatSession[]>([])
+  const [activeSessionId, setActiveSessionId] = useState<string | undefined>(
+    () => sessionStorage.getItem('aria_chat_session') ?? undefined,
+  )
 
   const fetchNotifications = () => {
     notificationsApi.getMyNotifications()
@@ -136,6 +142,12 @@ export default function AppLayout() {
     const interval = setInterval(fetchNotifications, 30_000)
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    agentApi.sessions()
+      .then(({ data }) => setSessions(data))
+      .catch(() => {})
+  }, [location.pathname])
 
   useEffect(() => {
     if (!bellOpen) return
@@ -199,6 +211,17 @@ export default function AppLayout() {
           </div>
         </div>
 
+        <button
+          className="new-chat-btn"
+          onClick={() => { setActiveSessionId(undefined); navigate('/chat?new=1') }}
+          type="button"
+        >
+          <svg fill="none" height="13" stroke="currentColor" strokeLinecap="round" strokeWidth="2" viewBox="0 0 24 24" width="13">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          New conversation
+        </button>
+
         <nav className="nav-section">
           <div className="nav-label">Workspace</div>
           {NAV.map(({ end, icon, label, to }) => (
@@ -230,6 +253,36 @@ export default function AppLayout() {
             </>
           )}
         </nav>
+
+        {sessions.length > 0 && (
+          <>
+            <div className="nav-section" style={{ paddingBottom: 0 }}>
+              <div className="nav-label">Recent</div>
+            </div>
+            <div className="sidebar-hist">
+              {sessions.slice(0, 5).map((s) => (
+                <button
+                  className={`hist-item${location.pathname === '/chat' && s.session_id === activeSessionId ? ' active' : ''}`}
+                  key={s.session_id}
+                  onClick={() => { setActiveSessionId(s.session_id); navigate(`/chat?session=${s.session_id}`) }}
+                  title={s.preview}
+                  type="button"
+                >
+                  {s.preview}
+                </button>
+              ))}
+              {sessions.length > 5 && (
+                <button
+                  className="hist-item hist-item-more"
+                  onClick={() => navigate('/chat')}
+                  type="button"
+                >
+                  View all conversations
+                </button>
+              )}
+            </div>
+          </>
+        )}
 
         <div className="sidebar-footer">
           <div className="user-row">
