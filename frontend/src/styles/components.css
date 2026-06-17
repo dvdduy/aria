@@ -1611,11 +1611,11 @@
 ════════════════════════════════════════════ */
 
 .pr-summary {
-  margin: var(--space-6) var(--space-6) 0;
   background: var(--color-bg-primary);
   border: 0.5px solid var(--color-border-default);
   border-radius: var(--radius-lg);
   padding: var(--space-6);
+  margin-bottom: var(--space-4);
 }
 
 .pr-summary-period {
@@ -1656,7 +1656,7 @@
   flex-shrink: 0;
 }
 
-.pr-history { margin: var(--space-6) var(--space-6) 0; }
+.pr-history { margin-bottom: var(--space-4); }
 
 .pr-history-title {
   font-size: var(--text-sm);

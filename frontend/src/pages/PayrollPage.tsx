@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { payrollApi } from '@/api/payroll'
 import type { PayrollRecord } from '@/types/models'
 
@@ -60,59 +61,71 @@ export default function PayrollPage() {
   const history = records.slice(1)
 
   return (
-    <div className="lp">
+    <div className="pol-page">
       <div className="page-topbar">
         <span className="page-topbar-title">Payroll</span>
       </div>
 
-      {isLoading && (
-        <div className="lt-empty">Loading payroll records…</div>
-      )}
+      <div className="pp">
+        {isLoading && (
+          <div style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--text-sm)' }}>Loading…</div>
+        )}
 
-      {error && (
-        <div className="lt-empty" style={{ color: 'var(--color-danger-600)' }}>{error}</div>
-      )}
+        {error && (
+          <div className="toast toast-error">{error}</div>
+        )}
 
-      {!isLoading && !error && records.length === 0 && (
-        <div className="lt-empty">No payroll records found.</div>
-      )}
-
-      {!isLoading && !error && latest && (
-        <>
-          <SummaryCard record={latest} />
-
-          {history.length > 0 && (
-            <div className="pr-history">
-              <div className="pr-history-title">Pay history</div>
-              <div className="ltable">
-                <div className="lt-head">
-                  <div className="lt-hc" style={{ flex: 2 }}>Period</div>
-                  <div className="lt-hc">Gross</div>
-                  <div className="lt-hc">Deductions</div>
-                  <div className="lt-hc">Net pay</div>
-                  <div className="lt-hc">Currency</div>
-                </div>
-                {history.map((r) => {
-                  const deductions = r.gross_salary - r.net_salary
-                  return (
-                    <div className="lt-row" key={r.id}>
-                      <div className="lt-c" style={{ flex: 2 }}>{formatPeriod(r.period_start)}</div>
-                      <div className="lt-c">{formatCurrency(r.gross_salary, r.currency)}</div>
-                      <div className="lt-c" style={{ color: 'var(--color-text-secondary)' }}>
-                        −{formatCurrency(deductions, r.currency)}
-                      </div>
-                      <div className="lt-c" style={{ fontWeight: 'var(--weight-medium)' }}>
-                        {formatCurrency(r.net_salary, r.currency)}
-                      </div>
-                      <div className="lt-c">{r.currency}</div>
-                    </div>
-                  )
-                })}
-              </div>
+        {!isLoading && !error && records.length === 0 && (
+          <div className="empty-state">
+            <div className="empty-state-icon">
+              <svg fill="none" height="20" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="20">
+                <rect height="14" rx="2" width="20" x="2" y="5"/><line x1="2" x2="22" y1="10" y2="10"/>
+              </svg>
             </div>
-          )}
-        </>
-      )}
+            <div className="empty-state-title">No payroll records yet</div>
+            <div className="empty-state-body">Your payslips will appear here once payroll has been processed.</div>
+          </div>
+        )}
+
+        {!isLoading && !error && latest && (
+          <>
+            <SummaryCard record={latest} />
+
+            {history.length > 0 && (
+              <div className="pr-history">
+                <div className="pr-history-title">Pay history</div>
+                <div className="ltable">
+                  <div className="lt-head">
+                    <div className="lt-hc" style={{ flex: 2 }}>Period</div>
+                    <div className="lt-hc">Gross</div>
+                    <div className="lt-hc">Deductions</div>
+                    <div className="lt-hc">Net pay</div>
+                  </div>
+                  {history.map((r) => {
+                    const deductions = r.gross_salary - r.net_salary
+                    return (
+                      <div className="lt-row" key={r.id}>
+                        <div className="lt-c" style={{ flex: 2 }}>{formatPeriod(r.period_start)}</div>
+                        <div className="lt-c">{formatCurrency(r.gross_salary, r.currency)}</div>
+                        <div className="lt-c" style={{ color: 'var(--color-text-secondary)' }}>
+                          −{formatCurrency(deductions, r.currency)}
+                        </div>
+                        <div className="lt-c" style={{ fontWeight: 'var(--weight-medium)' }}>
+                          {formatCurrency(r.net_salary, r.currency)}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            <Link className="tb-btn" style={{ marginTop: 'var(--space-4)' }} to="/chat">
+              Ask HR Agent about my payroll ↗
+            </Link>
+          </>
+        )}
+      </div>
     </div>
   )
 }
