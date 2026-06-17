@@ -976,6 +976,14 @@
   color: var(--color-text-tertiary);
 }
 
+.user-role {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .logout-btn { flex-shrink: 0; }
 
 .user-profile-link {

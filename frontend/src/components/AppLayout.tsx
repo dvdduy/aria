@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { agentApi, type ChatSession } from '@/api/agent'
+import { employeesApi } from '@/api/employees'
 import { notificationsApi } from '@/api/notifications'
 import type { Notification } from '@/types/models'
 
@@ -127,6 +128,7 @@ export default function AppLayout() {
   const [activeSessionId, setActiveSessionId] = useState<string | undefined>(
     () => sessionStorage.getItem('aria_chat_session') ?? undefined,
   )
+  const [userRole, setUserRole] = useState<string | null>(null)
 
   const fetchNotifications = () => {
     notificationsApi.getMyNotifications()
@@ -141,6 +143,12 @@ export default function AppLayout() {
     fetchNotifications()
     const interval = setInterval(fetchNotifications, 30_000)
     return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    employeesApi.getMe()
+      .then((emp) => setUserRole(emp.role))
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
@@ -290,6 +298,7 @@ export default function AppLayout() {
               <div className="avatar avatar-sm">{initials}</div>
               <div className="user-info">
                 <div className="user-name">{displayName || 'Unknown'}</div>
+                {userRole && <div className="user-role">{userRole}</div>}
               </div>
             </NavLink>
             <button className="btn-icon logout-btn" onClick={handleLogout} title="Sign out" type="button">
