@@ -68,7 +68,7 @@ function LeaveChip({ name, pending }: { name: string; pending: boolean }) {
       style={{ background: col.bg, color: col.color, borderColor: col.border }}
       title={`${name}${pending ? ' (pending)' : ''}`}
     >
-      <span className="cal-chip-av">{initials(name)}</span>
+      <span className="cal-chip-av" style={{ background: col.color }}>{initials(name)}</span>
       <span className="cal-chip-name">{firstName(name)}</span>
     </div>
   )

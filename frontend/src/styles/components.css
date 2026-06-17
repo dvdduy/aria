@@ -1805,6 +1805,7 @@
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: 28px;
   gap: 1px;
   background: var(--color-border-subtle);
   border: 0.5px solid var(--color-border-subtle);
@@ -1815,11 +1816,12 @@
 
 .cal-dow {
   background: var(--color-bg-secondary);
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 10px;
   font-weight: var(--weight-medium);
   color: var(--color-text-tertiary);
-  padding: 6px 0;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -1891,14 +1893,14 @@
   width: 14px;
   height: 14px;
   border-radius: var(--radius-full);
-  background: currentColor;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 7px;
+  font-weight: 700;
   color: #fff;
   flex-shrink: 0;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 .cal-chip-name {
