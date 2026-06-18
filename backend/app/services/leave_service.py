@@ -4,8 +4,10 @@ from sqlalchemy.orm import Session
 
 from app.models.employee import Employee
 from app.models.leave import LeaveRequest
+from app.models.user import User
 from app.schemas.leave import LeaveRequestCreate, LeaveRequestReject
 from app.services.employee_service import can_manage_employee, list_direct_reports
+from app.services.notification_service import create_notification
 
 
 class InvalidLeaveRequestError(ValueError):
@@ -166,6 +168,20 @@ def submit_leave_request(
     db.add(request)
     db.commit()
     db.refresh(request)
+
+    if employee.manager_id:
+        manager = db.query(Employee).filter(Employee.id == employee.manager_id).first()
+        if manager:
+            manager_user = db.query(User).filter(User.employee_id == manager.id).first()
+            if manager_user:
+                create_notification(
+                    db,
+                    manager_user.id,
+                    f"{employee.full_name} has submitted a leave request for "
+                    f"{request.days_requested} day(s) "
+                    f"({request.start_date} to {request.end_date}). Action required.",
+                )
+
     return request
 
 
@@ -190,6 +206,16 @@ def approve_leave_request(
     request.approved_at = datetime.now(UTC)
     db.commit()
     db.refresh(request)
+
+    employee_user = db.query(User).filter(User.employee_id == employee.id).first()
+    if employee_user:
+        create_notification(
+            db,
+            employee_user.id,
+            f"Your leave request for {request.days_requested} day(s) "
+            f"({request.start_date} to {request.end_date}) has been approved.",
+        )
+
     return request
 
 
@@ -215,4 +241,16 @@ def reject_leave_request(
     request.approved_at = datetime.now(UTC)
     db.commit()
     db.refresh(request)
+
+    employee_user = db.query(User).filter(User.employee_id == employee.id).first()
+    if employee_user:
+        reason = payload.rejection_reason or "No reason provided"
+        create_notification(
+            db,
+            employee_user.id,
+            f"Your leave request for {request.days_requested} day(s) "
+            f"({request.start_date} to {request.end_date}) has been rejected. "
+            f"Reason: {reason}",
+        )
+
     return request

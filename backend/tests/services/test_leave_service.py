@@ -4,6 +4,8 @@ import pytest
 
 from app.models.employee import Employee
 from app.models.leave import LeaveRequest
+from app.models.notification import Notification
+from app.models.user import User
 from app.schemas.leave import LeaveRequestCreate, LeaveRequestReject
 from app.services.leave_service import (
     InvalidLeaveRequestError,
@@ -463,3 +465,131 @@ def test_reject_leave_request_rejects_non_pending_request(db):
             request.id,
             LeaveRequestReject(rejection_reason="Coverage issue"),
         )
+
+
+def test_approve_leave_request_creates_notification_for_employee(db):
+    manager = Employee(email="manager@example.com", full_name="Example Manager")
+    db.add(manager)
+    db.commit()
+    db.refresh(manager)
+
+    direct_report = Employee(
+        email="report@example.com",
+        full_name="Direct Report",
+        manager_id=manager.id,
+    )
+    db.add(direct_report)
+    db.commit()
+    db.refresh(direct_report)
+
+    employee_user = User(
+        email="report@example.com",
+        hashed_password="hashed",
+        employee_id=direct_report.id,
+    )
+    db.add(employee_user)
+    db.commit()
+    db.refresh(employee_user)
+
+    request = LeaveRequest(
+        employee_id=direct_report.id,
+        leave_type="annual",
+        start_date=date(2026, 7, 1),
+        end_date=date(2026, 7, 5),
+        days_requested=5,
+        status="pending",
+    )
+    db.add(request)
+    db.commit()
+    db.refresh(request)
+
+    approve_leave_request(db, manager, request.id)
+
+    notifs = db.query(Notification).filter(Notification.user_id == employee_user.id).all()
+    assert len(notifs) == 1
+    assert "approved" in notifs[0].message
+
+
+def test_reject_leave_request_creates_notification_with_reason_for_employee(db):
+    manager = Employee(email="manager@example.com", full_name="Example Manager")
+    db.add(manager)
+    db.commit()
+    db.refresh(manager)
+
+    direct_report = Employee(
+        email="report@example.com",
+        full_name="Direct Report",
+        manager_id=manager.id,
+    )
+    db.add(direct_report)
+    db.commit()
+    db.refresh(direct_report)
+
+    employee_user = User(
+        email="report@example.com",
+        hashed_password="hashed",
+        employee_id=direct_report.id,
+    )
+    db.add(employee_user)
+    db.commit()
+    db.refresh(employee_user)
+
+    request = LeaveRequest(
+        employee_id=direct_report.id,
+        leave_type="annual",
+        start_date=date(2026, 7, 1),
+        end_date=date(2026, 7, 5),
+        days_requested=5,
+        status="pending",
+    )
+    db.add(request)
+    db.commit()
+    db.refresh(request)
+
+    reject_leave_request(db, manager, request.id, LeaveRequestReject(rejection_reason="Coverage issue"))
+
+    notifs = db.query(Notification).filter(Notification.user_id == employee_user.id).all()
+    assert len(notifs) == 1
+    assert "rejected" in notifs[0].message
+    assert "Coverage issue" in notifs[0].message
+
+
+def test_submit_leave_request_creates_notification_for_manager(db):
+    manager = Employee(email="manager@example.com", full_name="Example Manager")
+    db.add(manager)
+    db.commit()
+    db.refresh(manager)
+
+    manager_user = User(
+        email="manager@example.com",
+        hashed_password="hashed",
+        employee_id=manager.id,
+    )
+    db.add(manager_user)
+    db.commit()
+    db.refresh(manager_user)
+
+    employee = Employee(
+        email="employee@example.com",
+        full_name="Direct Report",
+        manager_id=manager.id,
+    )
+    db.add(employee)
+    db.commit()
+    db.refresh(employee)
+
+    submit_leave_request(
+        db,
+        employee,
+        LeaveRequestCreate(
+            leave_type="annual",
+            start_date=date(2026, 7, 1),
+            end_date=date(2026, 7, 5),
+            reason="Holiday",
+        ),
+    )
+
+    notifs = db.query(Notification).filter(Notification.user_id == manager_user.id).all()
+    assert len(notifs) == 1
+    assert "Direct Report" in notifs[0].message
+    assert "Action required" in notifs[0].message
