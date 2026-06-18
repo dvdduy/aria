@@ -54,6 +54,7 @@ def test_get_leave_request_returns_context_employee_leave_requests(db):
         {
             "id": str(own_request.id),
             "employee_id": str(employee.id),
+            "employee_name": "Example Employee",
             "leave_type": "annual",
             "start_date": "2026-07-01",
             "end_date": "2026-07-05",
@@ -178,6 +179,7 @@ def test_list_team_leave_returns_empty_list_for_employee_without_direct_reports(
 
     assert result == {
         "tool": "list_team_leave",
+        "status_filter": "pending",
         "leave_requests": [],
     }
 

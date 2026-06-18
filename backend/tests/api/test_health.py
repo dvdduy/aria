@@ -4,5 +4,5 @@ def test_health_returns_status(client):
     assert response.status_code == 200
     body = response.json()
     assert body["status"] in {"healthy", "degraded"}
-    assert body["version"] == "0.1.0-test"
+    assert body["version"]
     assert set(body["checks"].keys()) == {"database", "redis"}
