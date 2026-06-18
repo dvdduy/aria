@@ -1,81 +1,107 @@
-# Aria
+# Aria — AI HR Workflow Assistant
 
-Aria is an early-stage AI HR workflow assistant built to practice applied AI with a React frontend and Python backend. The product direction is inspired by Workday-style HR operations: employees and managers should be able to ask questions, submit requests, and complete routine HR workflows through a guarded AI assistant.
+A portfolio project demonstrating an AI-powered HR assistant. Employees, managers, and admins interact with a Claude-backed agent that answers HR questions and executes guarded workflows (leave requests, payroll lookups, policy search, team management).
 
-This project is currently a learning and portfolio project, not a production HR system.
+---
 
-## Current Stack
+## Screenshots
 
-- Frontend: React, Vite, TypeScript, React Router, React Query, Axios
-- Backend: FastAPI, SQLAlchemy, Pydantic, JWT auth
-- AI agent: Anthropic Messages API with tool-calling scaffolding
-- Async jobs: Celery and Redis
-- Data: PostgreSQL locally through Docker Compose
-- Deployment notes: Dockerfiles, docker-compose, Kubernetes plan
+<!-- Replace the placeholder paths below with actual screenshots after running the app. -->
 
-## Frontend Direction
+| Chat — employee submits leave via agent | Manager approves via agent |
+|---|---|
+| ![Chat](docs/screenshots/chat-employee.png) | ![Manager approval](docs/screenshots/chat-manager-approve.png) |
 
-Stay with Vite React for now. Next.js is useful when the app needs server-side rendering, file-based routing, SEO pages, server components, or integrated backend routes. Aria is mostly an authenticated internal dashboard, so Vite keeps the learning surface smaller and faster.
+| Team calendar | Leave request list |
+|---|---|
+| ![Calendar](docs/screenshots/calendar.png) | ![Leave](docs/screenshots/leave.png) |
 
-Use Vitest with the current frontend. Vitest is a test runner, not an alternative to Next.js. It fits Vite well and should cover hooks, API clients, form validation, and important user flows.
+---
 
-Recommended frontend plan:
+## Tech Stack
 
-1. Keep Vite React until there is a clear product reason to migrate.
-2. Add Vitest and Testing Library tests for login, protected routes, chat polling, and leave forms.
-3. Add end-to-end tests later with Playwright once the core flows stabilize.
+| Layer | Tech |
+|---|---|
+| Frontend | React 18, Vite, TypeScript, React Router v6, React Query, Axios |
+| Backend | FastAPI, SQLAlchemy 2, Pydantic v2, Alembic, JWT auth |
+| AI agent | Anthropic Messages API — tool-calling loop with guarded dispatch |
+| Async jobs | Celery + Redis (job polling, 5-min TTL) |
+| Database | PostgreSQL (Docker); SQLite for tests |
+| Rate limiting | slowapi — 10 requests/min per authenticated user |
+| Containerisation | Docker Compose (full local stack) |
+
+---
+
+## Features
+
+- **Conversational HR agent** — ask questions or execute workflows in plain English
+- **Leave workflow** — submit, approve, reject with in-app notifications
+- **Role-based access** — employee / manager / admin scopes enforced at every tool call
+- **Team calendar** — visual monthly view of all approved and pending leave
+- **Policy search** — agent answers questions grounded in stored HR policies
+- **Payroll lookup** — employees can query their own pay history; admins see all
+- **Session history** — past conversations are persisted and resumable
+- **Per-user rate limiting** — agent chat capped at 10 requests / minute
+
+---
 
 ## Local Development
 
-Prerequisites:
-
-- Docker Desktop
-- Node.js and npm for local frontend development
-- Python 3.12+ if running the backend outside Docker
-
-Start the full local stack:
+**Prerequisites:** Docker Desktop (frontend and backend run inside Compose)
 
 ```bash
+# Start everything
 docker compose up --build
+
+# Frontend  → http://localhost:5173
+# API       → http://localhost:8000
+# API docs  → http://localhost:8000/docs
 ```
 
-Expected local URLs:
+**Seed accounts**
 
-- Frontend: http://localhost:5173
-- API: http://localhost:8000
-- API docs: http://localhost:8000/docs in development
+| Role | Email | Password |
+|---|---|---|
+| Admin | admin@aria.dev | admin123 |
+| Manager | manager@aria.dev | manager123 |
+| Employee | employee@aria.dev | employee123 |
 
-Development seed accounts are intended to exist for local demos:
+**Reset the database**
 
-- `admin@aria.dev` / `admin123`
-- `manager@aria.dev` / `manager123`
-- `employee@aria.dev` / `employee123`
+```bash
+docker compose down -v && docker compose up --build
+```
 
-Do not use these credentials outside local development.
+---
 
-## Current Limitations
+## Running Tests
 
-- Several backend endpoints and agent tools are still placeholders.
-- Agent tool execution needs user-scoped authorization before it can safely read or mutate HR data.
-- Job status and result lookups should be tied to the requesting user.
-- Backend tests are scaffolded but need meaningful assertions.
-- Frontend lint configuration needs to be completed for ESLint 9.
-- Top-level environment examples should be cleaned up for encoding and formatting.
+```bash
+# Backend (inside Docker)
+docker compose run --rm api pytest tests/ -q
 
-## Portfolio Goals
+# Frontend
+cd frontend && npm test
+```
 
-This project can become a strong applied AI portfolio piece if it demonstrates:
+---
 
-- A practical HR workflow assistant rather than a generic chatbot.
-- Guarded tool use with clear permission checks.
-- A small but polished employee/manager/admin experience.
-- Tests around the workflows where AI mistakes would matter.
-- Clear documentation of tradeoffs, limitations, and next steps.
+## Architecture Overview
 
-## Planning Docs
+The agent flow spans five files:
 
-- [Product Requirements](PRODUCT_REQUIREMENTS.md)
-- [Architecture](ARCHITECTURE.md)
-- [Implementation Roadmap](ROADMAP.md)
-- [Project Plan](docs/PROJECT_PLAN.md)
-- [Interactive Design Mockup](docs/hr-agent-design-system.html)
+1. **`backend/app/api/agent.py`** — enqueues a Celery task, returns `job_id` immediately
+2. **`frontend/src/hooks/useAgentChat.ts`** — polls `/api/agent/jobs/{job_id}` every 2 s
+3. **`backend/app/tasks/agent_task.py`** — Celery task; writes status/result to Redis
+4. **`backend/app/agent/runner.py`** — drives the Anthropic tool-use loop (max 40 turns of history, configurable iteration cap)
+5. **`backend/app/agent/tools/`** — tool definitions, dispatch, and user-scoped context
+
+See [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) for the full feature roadmap and story status.
+
+---
+
+## Known Limitations
+
+- `send_notification` tool requires an `employee_id`, so the agent must resolve it via a prior lookup rather than by name.
+- No end-to-end Playwright tests yet — agent flows are covered by backend integration tests and frontend unit tests.
+- Cloud deployment is planned but not yet configured.
