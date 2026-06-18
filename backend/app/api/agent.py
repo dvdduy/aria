@@ -1,11 +1,12 @@
 import json
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
+from app.core.limiter import limiter
 from app.core.redis import redis_client
 from app.models.agent_memory import AgentMemory
 from app.models.user import User
@@ -17,7 +18,8 @@ JOB_TTL_SECONDS = 300
 
 
 @router.post("/chat", response_model=ChatEnqueueResponse)
-def chat(payload: ChatRequest, current_user: User = Depends(get_current_user)):
+@limiter.limit("10/minute")
+def chat(request: Request, payload: ChatRequest, current_user: User = Depends(get_current_user)):
     session_id = payload.session_id or str(uuid.uuid4())
     task = run_agent_task.delay(payload.message, session_id, str(current_user.id))
     redis_client.set(

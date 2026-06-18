@@ -435,6 +435,21 @@ def test_get_chat_history_requires_authentication(client):
     assert response.status_code == 403
 
 
+def test_chat_returns_429_after_rate_limit_exceeded(client, db, monkeypatch):
+    user = _create_user(db, "rate-limit@example.com")
+    fake_redis = FakeRedis()
+    monkeypatch.setattr(agent_api, "redis_client", fake_redis)
+    monkeypatch.setattr(agent_api.run_agent_task, "delay", fake_delay)
+
+    headers = _auth_headers(user)
+    for i in range(10):
+        r = client.post("/api/agent/chat", headers=headers, json={"message": "ping"})
+        assert r.status_code == 200, f"request {i + 1} should be within the limit"
+
+    r = client.post("/api/agent/chat", headers=headers, json={"message": "ping"})
+    assert r.status_code == 429
+
+
 def _create_user(db, email: str) -> User:
     user = User(email=email, hashed_password=hash_password("password"))
     db.add(user)
