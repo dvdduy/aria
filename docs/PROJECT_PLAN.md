@@ -4,7 +4,7 @@
 **Owner:** Duy Dang  
 **Mode:** Solo builder with AI-assisted development  
 **Planning Style:** Lightweight epics, user stories, and acceptance criteria  
-**Last Updated:** June 2026
+**Last Updated:** June 2026 (updated to reflect actual implementation status)
 
 ## Purpose
 
@@ -53,18 +53,18 @@ The first complete demo should prove the most important claim: Aria can safely c
 
 | Epic | Name | Priority | Status | Goal |
 | --- | --- | --- | --- | --- |
-| E0 | Project Foundation | P0 | In Progress | Make the project reliable to run, inspect, and extend. |
-| E1 | Authentication & Roles | P0 | Scaffolded | Users can log in and API permissions are enforceable. |
-| E2 | Employee & Team Data | P0 | Scaffolded | The system understands employee identity and manager relationships. |
-| E3 | Leave Workflow | P0 | Scaffolded | Employees and managers can complete leave flows. |
-| E4 | AI Agent Core | P0 | Scaffolded | Chat requests run asynchronously and return traceable responses. |
-| E5 | Safe Agent Tools | P0 | Scaffolded | Agent tools enforce backend authorization before reading or writing HR data. |
-| E6 | Policies | P1 | Scaffolded | Users can browse policies and the agent can answer policy questions from stored data. |
-| E7 | Payroll | P1 | Scaffolded | Employees can view own payroll summaries; agent access is read-only. |
-| E8 | Notifications | P1 | Planned | Users receive in-app status updates for important HR events. |
-| E9 | Testing & Quality | P0 | Scaffolded | Important workflows are protected by automated tests. |
+| E0 | Project Foundation | P0 | Verified | Make the project reliable to run, inspect, and extend. |
+| E1 | Authentication & Roles | P0 | Verified | Users can log in and API permissions are enforceable. |
+| E2 | Employee & Team Data | P0 | Verified | The system understands employee identity and manager relationships. |
+| E3 | Leave Workflow | P0 | Verified | Employees and managers can complete leave flows. |
+| E4 | AI Agent Core | P0 | Verified | Chat requests run asynchronously and return traceable responses. |
+| E5 | Safe Agent Tools | P0 | In Progress | Agent tools enforce backend authorization before reading or writing HR data. |
+| E6 | Policies | P1 | Verified | Users can browse policies and the agent can answer policy questions from stored data. |
+| E7 | Payroll | P1 | Verified | Employees can view own payroll summaries; agent access is read-only. |
+| E8 | Notifications | P1 | Verified | Users receive in-app status updates for important HR events. |
+| E9 | Testing & Quality | P0 | In Progress | Important workflows are protected by automated tests. |
 | E10 | Portfolio Polish | P1 | In Progress | The project tells a strong story through docs, mockups, and demo flow. |
-| E11 | Deployment & Operations | P2 | Planned | The app has a credible local and deployment story. |
+| E11 | Deployment & Operations | P2 | In Progress | The app has a credible local and deployment story. |
 
 ---
 
@@ -79,7 +79,7 @@ Detailed first-task guide: [E0-S5 Backend Test Environment](development/E0-S5-ba
 | Story ID | User Story | Priority | Status |
 | --- | --- | --- | --- |
 | E0-S1 | As a developer, I can run frontend type-check and build commands so I know the React app is healthy. | P0 | Implemented |
-| E0-S2 | As a developer, I can run lint with a known config so style and common bugs are caught early. | P0 | Scaffolded |
+| E0-S2 | As a developer, I can run lint with a known config so style and common bugs are caught early. | P0 | Verified |
 | E0-S3 | As a developer, I can see what is implemented versus planned so I do not overstate progress. | P0 | Implemented |
 | E0-S4 | As a developer, I can rely on design tokens matching the interactive mockup so UI work stays consistent. | P1 | Implemented |
 | E0-S5 | As a developer, I can run backend tests locally without depending on secret production-like environment variables. | P0 | Verified |
@@ -157,7 +157,7 @@ Detailed guide:
 | E2-S1 | As an employee, my user account can be linked to an employee record. | P0 | Verified |
 | E2-S2 | As a manager, I can see my direct reports. | P0 | Verified |
 | E2-S3 | As the backend, I can answer whether one employee reports to another. | P0 | Verified |
-| E2-S4 | As an admin, I can create and update employee records. | P2 | Not Started |
+| E2-S4 | As an admin, I can create and update employee records. | P2 | Verified |
 | E2-S5 | As a user, I can view my own profile information. | P1 | Verified |
 
 ### Acceptance Criteria
@@ -199,7 +199,7 @@ Detailed guide:
 | E3-S4 | As a manager, I can approve a direct report's leave request. | P0 | Verified |
 | E3-S5 | As a manager, I can reject a direct report's leave request with a reason. | P1 | Verified |
 | E3-S6 | As an employee, I cannot view or modify another employee's leave request. | P0 | Verified |
-| E3-S7 | As the system, every leave status change records who acted and when. | P0 | Scaffolded |
+| E3-S7 | As the system, every leave status change records who acted and when. | P0 | Verified |
 | E3-S8 | As a user, I can review leave requests from the Leave page UI. | P1 | Verified |
 
 ### Acceptance Criteria
@@ -321,7 +321,7 @@ Detailed guide:
 | E6-S2 | As a user, I can search policy titles and categories. | P1 | Verified |
 | E6-S3 | As a user, I can ask the agent about a policy and receive a grounded answer. | P1 | Verified |
 | E6-S4 | As a user, policy answers identify the source policy and version. | P1 | Verified |
-| E6-S5 | As an admin, I can create and update policy content. | P2 | Not Started |
+| E6-S5 | As an admin, I can create and update policy content. | P2 | Verified |
 
 ### Acceptance Criteria
 
@@ -346,11 +346,11 @@ Detailed guide:
 
 | Story ID | User Story | Priority | Status |
 | --- | --- | --- | --- |
-| E7-S1 | As an employee, I can view my own payroll records by period. | P1 | Scaffolded |
-| E7-S2 | As an employee, I cannot view another employee's payroll records. | P0 | Not Started |
-| E7-S3 | As an admin, I can view payroll summaries for employees. | P2 | Not Started |
-| E7-S4 | As a user, I can ask the agent for my own payroll summary. | P1 | Not Started |
-| E7-S5 | As the system, the agent cannot write payroll data. | P0 | Not Started |
+| E7-S1 | As an employee, I can view my own payroll records by period. | P1 | Verified |
+| E7-S2 | As an employee, I cannot view another employee's payroll records. | P0 | Verified |
+| E7-S3 | As an admin, I can view payroll summaries for employees. | P2 | Verified |
+| E7-S4 | As a user, I can ask the agent for my own payroll summary. | P1 | Verified |
+| E7-S5 | As the system, the agent cannot write payroll data. | P0 | Verified |
 
 ### Acceptance Criteria
 
@@ -375,11 +375,11 @@ Detailed guide:
 
 | Story ID | User Story | Priority | Status |
 | --- | --- | --- | --- |
-| E8-S1 | As an employee, I receive an in-app notification when my leave request is approved or rejected. | P1 | Not Started |
-| E8-S2 | As a manager, I receive an in-app notification when a direct report submits leave. | P1 | Not Started |
-| E8-S3 | As a user, I can see unread notification count in the app header. | P2 | Not Started |
-| E8-S4 | As a user, I can mark notifications as read. | P2 | Not Started |
-| E8-S5 | As the agent, I can trigger a notification through a safe backend tool. | P1 | Scaffolded |
+| E8-S1 | As an employee, I receive an in-app notification when my leave request is approved or rejected. | P1 | Verified |
+| E8-S2 | As a manager, I receive an in-app notification when a direct report submits leave. | P1 | Verified |
+| E8-S3 | As a user, I can see unread notification count in the app header. | P2 | Verified |
+| E8-S4 | As a user, I can mark notifications as read. | P2 | Verified |
+| E8-S5 | As the agent, I can trigger a notification through a safe backend tool. | P1 | Verified |
 
 ### Acceptance Criteria
 
@@ -403,11 +403,11 @@ Detailed guide:
 
 | Story ID | User Story | Priority | Status |
 | --- | --- | --- | --- |
-| E9-S1 | As a developer, I can run backend tests locally. | P0 | Not Started |
-| E9-S2 | As a developer, I can run frontend unit tests locally. | P1 | Scaffolded |
-| E9-S3 | As a developer, auth behavior is covered by API/service tests. | P0 | Not Started |
-| E9-S4 | As a developer, leave permissions are covered by service/API tests. | P0 | Not Started |
-| E9-S5 | As a developer, agent tools are tested with mocked model/tool calls. | P0 | Not Started |
+| E9-S1 | As a developer, I can run backend tests locally. | P0 | Verified |
+| E9-S2 | As a developer, I can run frontend unit tests locally. | P1 | Verified |
+| E9-S3 | As a developer, auth behavior is covered by API/service tests. | P0 | Verified |
+| E9-S4 | As a developer, leave permissions are covered by service/API tests. | P0 | Verified |
+| E9-S5 | As a developer, agent tools are tested with mocked model/tool calls. | P0 | Verified |
 | E9-S6 | As a developer, the first MVP flow has an end-to-end test or documented manual QA script. | P1 | Not Started |
 
 ### Acceptance Criteria
@@ -463,10 +463,10 @@ Detailed guide:
 
 | Story ID | User Story | Priority | Status |
 | --- | --- | --- | --- |
-| E11-S1 | As a developer, I can run the full stack locally with Docker Compose. | P0 | Implemented |
-| E11-S2 | As a developer, API and worker containers share the same backend code and settings. | P1 | Implemented |
+| E11-S1 | As a developer, I can run the full stack locally with Docker Compose. | P0 | Verified |
+| E11-S2 | As a developer, API and worker containers share the same backend code and settings. | P1 | Verified |
 | E11-S3 | As an operator, health checks report database and Redis connectivity. | P1 | Scaffolded |
-| E11-S4 | As an operator, secrets are not committed to source control. | P0 | Scaffolded |
+| E11-S4 | As an operator, secrets are not committed to source control. | P0 | Verified |
 | E11-S5 | As a reviewer, Kubernetes planning notes show deployment thinking. | P2 | Planned |
 | E11-S6 | As a product owner, I can deploy a small demo environment for portfolio review. | P2 | Not Started |
 
