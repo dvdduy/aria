@@ -30,5 +30,8 @@ class Settings(BaseSettings):
     agent_max_iterations: int = Field(10, alias="AGENT_MAX_ITERATIONS")
     agent_timeout_seconds: int = Field(30, alias="AGENT_TIMEOUT_SECONDS")
 
+    # TLS — set SSL_VERIFY=false for local Docker behind corporate TLS inspection
+    ssl_verify: bool = Field(True, alias="SSL_VERIFY")
+
 
 settings = Settings()  # type: ignore[call-arg]

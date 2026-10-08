@@ -11,6 +11,8 @@ dist/
 .ruff_cache/
 htmlcov/
 .coverage
+backend/test.db
+*.db
 
 # Node
 node_modules/

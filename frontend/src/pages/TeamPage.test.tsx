@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import TeamPage from './TeamPage'
 import * as employeesApiModule from '@/api/employees'
 import * as leaveApiModule from '@/api/leave'
+import type { LeaveRequest, LeaveStatus } from '@/types/models'
 
 vi.mock('@/api/employees', () => ({
   employeesApi: { getDirectReports: vi.fn() },
@@ -13,7 +14,6 @@ vi.mock('@/api/leave', () => ({
   leaveApi: { getAllTeamLeaveRequests: vi.fn() },
 }))
 
-const today = new Date().toISOString().slice(0, 10)
 const tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10)
 const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
 
@@ -21,7 +21,7 @@ function makeEmployee(id: string, name: string): ReturnType<typeof Object.assign
   return { id, full_name: name, email: `${id}@example.com`, role: 'Engineer', department: 'Eng', is_active: true, manager_id: null, start_date: null, manager_name: null }
 }
 
-function makeLeave(employeeId: string, status: string, start: string, end: string) {
+function makeLeave(employeeId: string, status: LeaveStatus, start: string, end: string): LeaveRequest {
   return { id: `leave-${employeeId}`, employee_id: employeeId, employee_name: 'Test', leave_type: 'annual', start_date: start, end_date: end, days_requested: 1, status, reason: null }
 }
 

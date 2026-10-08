@@ -180,7 +180,7 @@ export default function ChatPage() {
     ta.style.height = `${ta.scrollHeight}px`
   }
 
-  const useSuggestion = (text: string) => {
+  const applySuggestion = (text: string) => {
     setInput(text)
     textareaRef.current?.focus()
   }
@@ -202,7 +202,7 @@ export default function ChatPage() {
 
       <div className="sugg-row">
         {suggestions.map((s) => (
-          <button className="sugg-btn" key={s} onClick={() => useSuggestion(s)} type="button">
+          <button className="sugg-btn" key={s} onClick={() => applySuggestion(s)} type="button">
             {s}
           </button>
         ))}

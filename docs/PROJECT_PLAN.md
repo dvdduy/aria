@@ -4,7 +4,7 @@
 **Owner:** Duy Dang  
 **Mode:** Solo builder with AI-assisted development  
 **Planning Style:** Lightweight epics, user stories, and acceptance criteria  
-**Last Updated:** June 2026 (updated to reflect actual implementation status)
+**Last Updated:** October 2026 (portfolio push — status aligned with implemented MVP)
 
 ## Purpose
 
@@ -116,7 +116,7 @@ Detailed guides:
 | Story ID | User Story | Priority | Status |
 | --- | --- | --- | --- |
 | E1-S1 | As a user, I can register with email and password so I can access Aria. | P1 | Scaffolded |
-| E1-S2 | As a user, I can log in and receive an access token so protected API calls work. | P0 | Scaffolded |
+| E1-S2 | As a user, I can log in and receive an access token so protected API calls work. | P0 | Verified |
 | E1-S3 | As a user, I cannot register the same email twice. | P0 | Verified |
 | E1-S4 | As an inactive user, I cannot access protected API routes. | P0 | Verified |
 | E1-S5 | As an admin, I can access admin-only routes. | P1 | Verified |
@@ -437,15 +437,15 @@ Detailed guide:
 | E10-S2 | As a reviewer, I can see an architecture document with tradeoffs and failure modes. | P1 | Implemented |
 | E10-S3 | As a reviewer, I can see a PRD that explains users, requirements, and scope. | P1 | Implemented |
 | E10-S4 | As a reviewer, I can open an interactive mockup that shows the intended UI. | P1 | Implemented |
-| E10-S5 | As a reviewer, I can follow a scripted demo path from login to completed leave approval. | P0 | Not Started |
-| E10-S6 | As a reviewer, I can see screenshots or GIFs of the MVP flow. | P2 | Not Started |
+| E10-S5 | As a reviewer, I can follow a scripted demo path from login to completed leave approval. | P0 | Verified |
+| E10-S6 | As a reviewer, I can see screenshots or GIFs of the MVP flow. | P2 | Planned |
 | E10-S7 | As a reviewer, I can clearly tell planned features from built features. | P0 | Implemented |
 
 ### Acceptance Criteria
 
 - README links to PRD, architecture, project plan, roadmap, and mockup.
 - Demo script uses seeded users and seeded data.
-- Screenshots are current and generated from the working app.
+- Demo media (GIF/PNG) is optional; `DEMO.md` is the primary reviewer walkthrough until captures are added.
 - Docs avoid claiming planned features are already implemented.
 
 ### Dependencies

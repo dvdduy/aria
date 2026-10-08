@@ -33,7 +33,7 @@ services:
 
   frontend:
     build: ./frontend
-    command: npm run dev -- --host
+    entrypoint: ["/bin/sh", "/app/docker-entrypoint.sh"]
     ports:
       - "5173:5173"
     env_file: ./frontend/.env.example

@@ -2,19 +2,16 @@
 
 A portfolio project demonstrating an AI-powered HR assistant. Employees, managers, and admins interact with a Claude-backed agent that answers HR questions and executes guarded workflows (leave requests, payroll lookups, policy search, team management).
 
+**Implemented today:** JWT auth with role-scoped agent tools, leave submit/approve/notify, policy and payroll lookup, team calendar, Docker Compose local stack, and CI.  
+**Planned later:** hosted demo, Kubernetes manifests, Playwright E2E, RAG-style policy search. See [ROADMAP.md](ROADMAP.md).
+
 ---
 
-## Screenshots
+## Demo
 
-<!-- Replace the placeholder paths below with actual screenshots after running the app. -->
-
-| Chat — employee submits leave via agent | Manager approves via agent |
-|---|---|
-| ![Chat](docs/screenshots/chat-employee.png) | ![Manager approval](docs/screenshots/chat-manager-approve.png) |
-
-| Team calendar | Leave request list |
-|---|---|
-| ![Calendar](docs/screenshots/calendar.png) | ![Leave](docs/screenshots/leave.png) |
+Walk the seeded flows in [DEMO.md](DEMO.md) (employee leave → manager approval via chat).  
+UI direction: [docs/hr-agent-design-system.html](docs/hr-agent-design-system.html).  
+Demo GIF/screenshots are planned but not bundled in this release.
 
 ---
 

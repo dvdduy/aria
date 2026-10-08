@@ -1,9 +1,9 @@
 # AI HR Workflow Agent — Product Requirements Document
 
 **Version:** 1.0  
-**Status:** Draft  
+**Status:** MVP complete / portfolio snapshot  
 **Owner:** Duy Dang  
-**Last Updated:** June 2026
+**Last Updated:** October 2026
 
 ---
 

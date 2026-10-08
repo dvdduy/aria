@@ -211,7 +211,7 @@ describe('ChatPage', () => {
         {
           role: 'assistant',
           content: 'Done.',
-          toolTrace: [{ tool: 'get_leave_request', summary: 'get_leave_request → found 2 requests', status: 'ok' }],
+          toolTrace: [{ tool: 'get_leave_request', summary: 'get_leave_request → found 2 requests', status: 'success' }],
         },
       ],
     })

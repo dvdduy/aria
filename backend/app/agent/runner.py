@@ -1,6 +1,7 @@
 import json
 import uuid
 
+import httpx
 from anthropic import Anthropic
 from sqlalchemy.orm import Session
 
@@ -15,7 +16,14 @@ from app.models.user import User
 
 class AgentRunner:
     def __init__(self):
-        self.client = Anthropic(api_key=settings.anthropic_api_key)
+        http_client = None
+        if not settings.ssl_verify:
+            # Local Docker Desktop / corporate TLS inspection can break CA verification.
+            http_client = httpx.Client(verify=False)
+        self.client = Anthropic(
+            api_key=settings.anthropic_api_key,
+            http_client=http_client,
+        )
 
     def run(self, message: str, session_id: str, user_id: str, db: Session) -> dict:
         user = db.query(User).filter(User.id == user_id).first()

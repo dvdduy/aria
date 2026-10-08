@@ -1,11 +1,11 @@
-FROM node:20-alpine
+FROM node:20-bookworm-slim
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm install
-
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 COPY . .
 
 EXPOSE 5173
-CMD ["npm", "run", "dev", "--", "--host"]
+ENTRYPOINT ["/docker-entrypoint.sh"]

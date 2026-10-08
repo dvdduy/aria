@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import ProfilePage from './ProfilePage'
 import * as employeesApiModule from '@/api/employees'
 import * as leaveApiModule from '@/api/leave'
+import type { LeaveRequest, LeaveStatus, LeaveType } from '@/types/models'
 
 vi.mock('@/api/employees', () => ({
   employeesApi: { getMe: vi.fn() },
@@ -26,7 +27,7 @@ const mockEmployee = {
   start_date: '2022-01-15',
 }
 
-function makeLeave(id: string, type: string, status: string, days: number) {
+function makeLeave(id: string, type: LeaveType, status: LeaveStatus, days: number): LeaveRequest {
   return {
     id,
     employee_id: 'emp-1',

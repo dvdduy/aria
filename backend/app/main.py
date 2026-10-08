@@ -2,8 +2,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import _rate_limit_exceeded_handler  # type: ignore[attr-defined]
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from starlette.requests import Request
+from starlette.responses import Response
 
 from app.api import agent, auth, employees, health, leave, notifications, payroll, policies
 from app.core.config import settings
@@ -34,7 +36,13 @@ app = FastAPI(
 )
 
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+
+def _rate_limit_handler(request: Request, exc: Exception) -> Response:
+    return _rate_limit_exceeded_handler(request, exc)  # type: ignore[arg-type]
+
+
+app.add_exception_handler(RateLimitExceeded, _rate_limit_handler)
 
 app.add_middleware(
     CORSMiddleware,

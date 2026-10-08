@@ -4,6 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import DashboardPage from './DashboardPage'
 import * as employeesApiModule from '@/api/employees'
 import * as leaveApiModule from '@/api/leave'
+import type { LeaveRequest } from '@/types/models'
 
 vi.mock('@/api/employees', () => ({
   employeesApi: { getMe: vi.fn() },
@@ -25,7 +26,7 @@ const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
 
 const mockProfile = { id: 'emp-1', full_name: 'Alice Smith', email: 'alice@example.com', role: 'Engineer', department: 'Engineering', is_active: true, manager_id: null, start_date: null, manager_name: null }
 
-function makeLeave(overrides = {}) {
+function makeLeave(overrides: Partial<LeaveRequest> = {}): LeaveRequest {
   return {
     id: 'leave-1', employee_id: 'emp-2', employee_name: 'Bob Jones',
     leave_type: 'annual', start_date: today, end_date: tomorrow,

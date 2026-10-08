@@ -1,6 +1,6 @@
 # Aria Implementation Roadmap
 
-This roadmap keeps the project honest while the product documentation stays aspirational. Use it to tell what is built, what is scaffolded, and what is intentionally planned for later.
+This roadmap keeps the project honest: what ships today, what is partial, and what is intentionally later.
 
 ## Status Legend
 
@@ -8,48 +8,51 @@ This roadmap keeps the project honest while the product documentation stays aspi
 | --- | --- |
 | Implemented | Works in the app today and should be kept passing. |
 | Scaffolded | File structure or UI exists, but behavior is incomplete. |
-| Planned | Product and technical direction is chosen, but implementation has not started. |
-| Deferred | Explicitly out of the current learning/MVP scope. |
+| Planned | Direction chosen; implementation has not started. |
+| Deferred | Explicitly out of the current MVP / portfolio scope. |
 
 ## Current Status
 
 | Area | Status | Notes |
 | --- | --- | --- |
-| React app shell | Implemented | Vite, React Router, pages, layout, shared UI components. |
-| Design tokens | Implemented | Tokens are aligned with the interactive mockup in `docs/hr-agent-design-system.html`. |
-| Auth API | Scaffolded | Register/login service exists; needs duplicate-email handling, refresh-token decision, and stronger tests. |
-| JWT-protected API dependencies | Scaffolded | `get_current_user` and `require_admin` exist. More route coverage is needed. |
-| Agent chat enqueue/polling | Scaffolded | API, Celery task, Redis status/result keys, and frontend polling exist. Job ownership checks are still needed. |
-| Agent tool catalog | Scaffolded | Tool schemas exist. Tool implementations are safe stubs until business logic and authorization are added. |
-| Leave management | Scaffolded | Models and UI exist. API/service behavior needs to be implemented end to end. |
-| Employee records | Scaffolded | Models and placeholder screens exist. Admin CRUD is planned. |
-| Policies | Scaffolded | Models and UI exist. Search/RAG-style policy lookup is planned. |
-| Payroll | Scaffolded | Models and UI exist. Read-only self-access is planned. |
-| Notifications | Planned | Tool stub exists. Notification model/API/UI still need design and implementation. |
-| Tests | Scaffolded | Test folders exist. Meaningful backend and frontend assertions are the next priority. |
-| Docker Compose | Implemented | Local API, worker, frontend, Postgres, and Redis services are defined. |
-| Kubernetes | Planned | `k8s/README.md` captures deployment intent; manifests will be added after the MVP workflow is stable. |
+| React app shell | Implemented | Vite, React Router, pages, layout, shared UI. |
+| Design tokens | Implemented | Aligned with `docs/hr-agent-design-system.html`. |
+| Auth (JWT login) | Implemented | Login + JWT dependencies; refresh tokens deferred. |
+| Agent chat enqueue/polling | Implemented | Celery + Redis job status/result; job ownership checks in place. |
+| Agent tools + authorization | Implemented | Leave, team, policy, payroll, notifications — service-level auth on writes. |
+| Leave management | Implemented | Submit / approve / reject via API, UI, and agent tools. |
+| Employee records | Implemented | Admin CRUD and manager team views. |
+| Policies | Implemented | Keyword/category lookup for agent answers (not RAG). |
+| Payroll | Implemented | Read-only self / manager / admin scoped access. |
+| Notifications | Implemented | In-app bell; auto-notify on leave submit/approve/reject. |
+| Tests + CI | Implemented | Backend pytest/ruff/mypy; frontend lint/type-check/Vitest; GitHub Actions. |
+| Docker Compose | Implemented | API, worker, frontend, Postgres, Redis. Local TLS/`SSL_VERIFY` and frontend entrypoint workarounds for Windows/WSL + corporate TLS. |
+| Demo media (GIF/PNG) | Planned | README links to `DEMO.md` until captures are added. |
+| Playwright E2E | Planned | Manual path documented in `DEMO.md`. |
+| Kubernetes | Planned | Intent in `k8s/README.md`; manifests later. |
+| Hosted demo deploy | Planned | Not configured yet. |
+| RAG policy search | Deferred | Current lookup is sufficient for MVP. |
+| Refresh tokens | Deferred | Access-token JWT is enough for local demo. |
 
-## Recommended MVP Slice
+## MVP slice (done)
 
-Build one polished workflow before expanding breadth:
+The core portfolio demo path works end to end:
 
-1. Manager logs in.
-2. Manager sees pending leave requests.
-3. Manager asks the agent to approve Sarah Chen's leave.
-4. Agent resolves employee, checks manager permission, updates leave status, and records a tool trace.
-5. UI shows the final chat response and result card.
-6. Tests prove that unauthorized users cannot approve or view another employee's data.
+1. Employee books leave via agent (or Leave UI).
+2. Manager sees pending requests.
+3. Manager asks the agent to approve and notify.
+4. Tool trace + in-app notification confirm the outcome.
+5. Tests cover unauthorized leave access and main UI flows.
 
-## Foundation Tasks
+Follow [DEMO.md](DEMO.md) for the scripted walkthrough.
 
-- Fix agent tool imports with explicit stubs.
-- Make lint/type-check/test commands predictable.
-- Add real tests for auth and leave permissions.
-- Scope agent jobs to the authenticated user.
-- Add service-level authorization before any AI tool writes data.
-- Clean encoding artifacts in docs and comments.
+## Next (when useful)
 
-## Frontend Direction
+- Add a short demo GIF to the README.
+- Playwright smoke for the leave approval path.
+- Small hosted demo environment for reviewers.
+- Kubernetes manifests after local MVP stays stable.
 
-Stay with Vite React for the MVP. Use Vitest for component and hook tests, and add Playwright once the first end-to-end workflow stabilizes. Revisit Next.js only if Aria grows public pages, server-rendered content, or framework-level backend needs.
+## Frontend direction
+
+Stay on Vite + React for the portfolio MVP. Vitest covers components/hooks; add Playwright when the demo path needs automated UI coverage. Revisit Next.js only if Aria needs public SSR pages or framework-level backend features.

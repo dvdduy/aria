@@ -3,6 +3,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import CalendarPage from './CalendarPage'
 import * as leaveApiModule from '@/api/leave'
 import * as employeesApiModule from '@/api/employees'
+import type { LeaveRequest, LeaveStatus } from '@/types/models'
 
 vi.mock('@/api/leave', () => ({
   leaveApi: {
@@ -23,7 +24,7 @@ const todayStr = today.toISOString().slice(0, 10)
 
 const mockMe = { id: 'emp-me', full_name: 'Sam Staff', email: 'sam@example.com', role: 'Engineer', department: 'Eng', is_active: true, manager_id: null, start_date: null, manager_name: null }
 
-function makeLeave(id: string, name: string | null, status: string, start: string, end: string) {
+function makeLeave(id: string, name: string | null, status: LeaveStatus, start: string, end: string): LeaveRequest {
   return { id, employee_id: 'emp-1', employee_name: name, leave_type: 'annual', start_date: start, end_date: end, days_requested: 1, status, reason: null }
 }
 

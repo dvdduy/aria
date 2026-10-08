@@ -103,7 +103,17 @@ describe('PayrollPage', () => {
   it('shows employee selector for admin users', async () => {
     sessionStorage.setItem('aria_token', makeAdminToken())
     vi.mocked(employeesApiModule.employeesApi.listAll).mockResolvedValue([
-      { id: 'emp-2', email: 'alice@example.com', full_name: 'Alice Smith', is_active: true },
+      {
+        id: 'emp-2',
+        email: 'alice@example.com',
+        full_name: 'Alice Smith',
+        department: 'Engineering',
+        role: 'Engineer',
+        manager_id: null,
+        manager_name: null,
+        start_date: null,
+        is_active: true,
+      },
     ])
 
     renderPage()
@@ -115,7 +125,17 @@ describe('PayrollPage', () => {
   it('shows contextual empty state body when viewing a specific employee', async () => {
     sessionStorage.setItem('aria_token', makeAdminToken())
     vi.mocked(employeesApiModule.employeesApi.listAll).mockResolvedValue([
-      { id: 'emp-2', email: 'alice@example.com', full_name: 'Alice Smith', is_active: true },
+      {
+        id: 'emp-2',
+        email: 'alice@example.com',
+        full_name: 'Alice Smith',
+        department: 'Engineering',
+        role: 'Engineer',
+        manager_id: null,
+        manager_name: null,
+        start_date: null,
+        is_active: true,
+      },
     ])
     vi.mocked(payrollApiModule.payrollApi.getMyPayroll).mockResolvedValue([])
     vi.mocked(payrollApiModule.payrollApi.getEmployeePayroll).mockResolvedValue([])
